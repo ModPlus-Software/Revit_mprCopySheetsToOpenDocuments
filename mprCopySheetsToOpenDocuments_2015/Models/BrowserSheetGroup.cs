@@ -1,0 +1,104 @@
+﻿namespace mprCopySheetsToOpenDocuments.Models
+{
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.Linq;
+    using Helpers;
+    using ModPlusAPI.Annotations;
+    using ModPlusAPI.Mvvm;
+
+    public class BrowserSheetGroup : VmBase, IBrowserItem
+    {
+        private string _fullPath;
+        private bool _checked;
+        private bool _isExpanded;
+
+        public BrowserSheetGroup(string name, BrowserSheetGroup parentGroup)
+        {
+            Name = name;
+            ParentGroup = parentGroup;
+            SubItems = new ObservableCollection<IBrowserItem>();
+        }
+
+        /// <summary>
+        /// Имя группы
+        /// </summary>
+        public string Name { get; }
+
+        [CanBeNull]
+        public BrowserSheetGroup ParentGroup { get; }
+
+        /// <summary>
+        /// Листы в группе
+        /// </summary>
+        public ObservableCollection<IBrowserItem> SubItems { get; private set; }
+
+        /// <summary>Выбраны ли все листы в группе</summary>
+        public bool Checked
+        {
+            get => _checked;
+            set
+            {
+                if (value == _checked)
+                    return;
+                _checked = value;
+                foreach (var browserSheet in SubItems)
+                    browserSheet.Checked = value;
+
+                OnPropertyChanged();
+            }
+        }
+
+        /// <summary>Развернута ли группа</summary>
+        public bool IsExpanded
+        {
+            get => _isExpanded;
+            set
+            {
+                _isExpanded = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string GetFullPath()
+        {
+            if (_fullPath == null)
+            {
+                List<string> groupNames = new List<string> { Name };
+                BrowserSheetGroup parentGroup = ParentGroup;
+                while (parentGroup != null)
+                {
+                    groupNames.Add(parentGroup.Name);
+                    parentGroup = parentGroup.ParentGroup;
+                }
+
+                groupNames.Reverse();
+                _fullPath = string.Join("*", groupNames);
+            }
+
+            return _fullPath;
+        }
+
+        public void SortSheets(SortOrder sortOrder)
+        {
+            if (SubItems.Any())
+            {
+                if (SubItems.First() is BrowserSheet)
+                {
+                    var sheets = SubItems.Where(i => i is BrowserSheet).Cast<BrowserSheet>();
+                    SubItems = sortOrder == SortOrder.Ascending
+                        ? new ObservableCollection<IBrowserItem>(sheets.OrderBy(s => s.SheetNumber, new OrdinalStringComparer()))
+                        : new ObservableCollection<IBrowserItem>(sheets.OrderByDescending(s => s.SheetNumber, new OrdinalStringComparer()));
+                }
+                else
+                {
+                    var groups = SubItems.Where(i => i is BrowserSheetGroup).Cast<BrowserSheetGroup>().ToList();
+                    groups.ForEach(g => g.SortSheets(sortOrder));
+                    SubItems = sortOrder == SortOrder.Ascending
+                        ? new ObservableCollection<IBrowserItem>(groups.OrderBy(g => g.Name, new OrdinalStringComparer()))
+                        : new ObservableCollection<IBrowserItem>(groups.OrderByDescending(g => g.Name, new OrdinalStringComparer()));
+                }
+            }
+        }
+    }
+}
