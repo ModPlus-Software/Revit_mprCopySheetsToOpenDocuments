@@ -60,6 +60,9 @@
     <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Command.cs">
       <Link>Command.cs</Link>
     </Compile>
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\CopyUseDestination.cs">
+      <Link>Helpers\CopyUseDestination.cs</Link>
+    </Compile>
     <Compile Include="..\mprcopysheetstoopendocuments_2015\helpers\OrdinalStringComparer.cs">
       <Link>Helpers\OrdinalStringComparer.cs</Link>
     </Compile>
@@ -91,7 +94,6 @@
       <Link>Views\MainWindow.xaml.cs</Link>
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\CopyUseDestination.cs" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="..\mprcopysheetstoopendocuments_2015\resources\mprCopySheetsToOpenDocuments_16x16.png">

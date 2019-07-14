@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command.cs" />
+    <Compile Include="Helpers\CopyUseDestination.cs" />
     <Compile Include="Helpers\OrdinalStringComparer.cs" />
     <Compile Include="Models\BrowserSheet.cs" />
     <Compile Include="Models\BrowserSheetGroup.cs" />
