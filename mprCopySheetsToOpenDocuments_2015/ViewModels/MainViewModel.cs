@@ -481,6 +481,12 @@
         {
 
         }
+
+        private static void copy_viewports(Document activeDocument, ViewSheet sheet, Document destinationDocument)
+        {
+            var viewPorts = sheet.GetAllViewports();
+        }
+
         private static bool copy_guideGrids(Document activeDocument, ViewSheet sheet, ViewSheet sheetNew, Document destinationDocument, CopyPasteOptions cp_options)
         {
             ElementId GuideGridsId = sheet.get_Parameter(BuiltInParameter.SHEET_GUIDE_GRID).AsElementId();
