@@ -484,7 +484,15 @@
 
         private static void copy_viewports(Document activeDocument, ViewSheet sheet, Document destinationDocument)
         {
-            var viewPorts = sheet.GetAllViewports();
+            var viewPortsId = sheet.GetAllViewports();
+            var viewPorts = new List<Viewport>();
+            if (viewPortsId.Any())
+            {
+                foreach (var viewPortId in viewPortsId)
+                {
+                    viewPorts.Add((activeDocument.GetElement(viewPortId) as Viewport));
+                }
+            }
         }
 
         private static bool copy_guideGrids(Document activeDocument, ViewSheet sheet, ViewSheet sheetNew, Document destinationDocument, CopyPasteOptions cp_options)
