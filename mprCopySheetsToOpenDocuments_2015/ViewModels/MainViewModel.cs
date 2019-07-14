@@ -316,11 +316,10 @@
         }
 
         private async void CopySheets(object o)
-        {
+        {            
             var selectedSheets = SheetGroups
                 .SelectMany(g => g.SubItems.Where(i => i is BrowserSheet sheet && sheet.Checked).Cast<BrowserSheet>())
-                .ToList();
-
+                .ToList();           
             if (!selectedSheets.Any())
             {
                 await _mainWindow.ShowMessageAsync("Нужно выбрать листы!", string.Empty).ConfigureAwait(true);
@@ -350,11 +349,51 @@
                     // Каждую итерацию оборачиваем в try{} catch{} чтобы в случае ошибки не прерывалась работа
                     try
                     {
-                        // имитация работы
+                        // имитация работы                        
+
+                        Document dest_doc = destinationDocument.Document;
+                        FilteredElementCollector сollectorView = new FilteredElementCollector(dest_doc).OfClass(typeof(View));
+                        if (!сollectorView.Cast<View>().Where(x => x.ViewType == ViewType.Legend).Any())
+                        {
+                            await _mainWindow.ShowMessageAsync("Неоходимо создать легенду", string.Empty).ConfigureAwait(true);
+                            return;
+
+                        }
+
+                        var viewContents = new FilteredElementCollector(doc).OwnedByView(sheet.Id);
+                        List<ElementId> viewContentsId = new List<ElementId>();
+                        if (viewContents.Any())
+                        {                            
+                            foreach (var item in viewContents)
+                            {
+                                if (item.Category != null)
+                                    if (item.Category.Name == "Основные надписи" || item.Category.Name == "Текстовые примечания")
+                                        viewContentsId.Add(item.Id);
+                            }
+
+                        }
+
+
+                        using (Transaction t = new Transaction(dest_doc, "Create"))
+                        {
+                            CopyPasteOptions cp_options = new CopyPasteOptions();
+                            cp_options.SetDuplicateTypeNamesHandler(new Helpers.CopyUseDestination());
+                            t.Start();
+                            //ViewDrafting.Create(dest_doc, dest_doc.GetDefaultElementTypeId(ElementTypeGroup.ViewTypeDrafting));
+                            ViewSheet newViewSheet = ViewSheet.Create(dest_doc, ElementId.InvalidElementId);
+                            if (newViewSheet != null)
+                            {
+                                newViewSheet.get_Parameter(BuiltInParameter.SHEET_NAME).Set(browserSheet.SheetName);
+                                newViewSheet.get_Parameter(BuiltInParameter.SHEET_NUMBER).Set(browserSheet.SheetNumber);
+                                ElementTransformUtils.CopyElements(sheet, viewContentsId, newViewSheet, null, cp_options);
+                            }
+                            t.Commit();
+                        }
                         await Task.Delay(500).ConfigureAwait(true);
                         ProgressText = $"Copy sheet {browserSheet.SheetNumber}-{browserSheet.SheetName} to document {destinationDocument.Title}";
                         progressIndex++;
                         ProgressValue = progressIndex;
+                        
                     }
                     catch (Exception exception)
                     {
@@ -369,6 +408,17 @@
             ProgressText = string.Empty;
 
             IsWork = false;
+        }
+
+        private static bool copySheet(Document activeDocument, ViewSheet sheet, Document destinationDocument)
+        {
+            var new_view = ViewDrafting.Create(destinationDocument, activeDocument.GetDefaultElementTypeId(ElementTypeGroup.ViewTypeDrafting));
+            return true;
+        }
+
+        private static void copy_view(Document activeDocument, ViewSheet sheet, Document destinationDocument)
+        {
+
         }
     }
 }

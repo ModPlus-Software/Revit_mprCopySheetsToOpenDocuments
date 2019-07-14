@@ -33,21 +33,21 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ModPlusAPI">
-      <HintPath>..\..\..\..\..\..\..\ModPlus\Extensions\ModPlusAPI.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>C:\ModPlus\Extensions\ModPlusAPI.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="ModPlusStyle">
-      <HintPath>..\..\..\..\..\..\..\ModPlus\Extensions\ModPlusStyle.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>C:\ModPlus\Extensions\ModPlusStyle.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="RevitAPI">
-      <HintPath>C:\_Revit dlls\2017\RevitAPI.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files\Autodesk\Revit 2017\RevitAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitAPIUI">
-      <HintPath>C:\_Revit dlls\2017\RevitAPIUI.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files\Autodesk\Revit 2017\RevitAPIUI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -91,6 +91,7 @@
       <Link>Views\MainWindow.xaml.cs</Link>
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\CopyUseDestination.cs" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="..\mprcopysheetstoopendocuments_2015\resources\mprCopySheetsToOpenDocuments_16x16.png">

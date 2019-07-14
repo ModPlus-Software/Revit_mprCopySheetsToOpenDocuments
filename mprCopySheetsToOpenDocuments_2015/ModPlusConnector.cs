@@ -38,7 +38,7 @@
 
         public string Description => "Потом напишу =)";
 
-        public string Author => "Пахомов Максим";
+        public string Author => "Похомов Максим";
 
         public string Price => "0";
 
