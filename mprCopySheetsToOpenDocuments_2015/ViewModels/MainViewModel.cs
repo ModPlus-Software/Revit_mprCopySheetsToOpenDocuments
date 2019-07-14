@@ -209,6 +209,36 @@
             }
         }
 
+        private bool _copyGenericAnnotation;
+
+        /// <summary></summary>
+        public bool CopyGenericAnnotation
+        {
+            get => _copyGenericAnnotation;
+            set
+            {
+                if (Equals(value, _copyGenericAnnotation)) return;
+                _copyGenericAnnotation = value;
+                OnPropertyChanged();
+                UserConfigFile.SetValue(_langItem, nameof(CopyGenericAnnotation), value.ToString(), true);
+            }
+        }
+
+        private bool _copyRasterImages;
+
+        /// <summary></summary>
+        public bool CopyRasterImages
+        {
+            get => _copyRasterImages;
+            set
+            {
+                if (Equals(value, _copyRasterImages)) return;
+                _copyRasterImages = value;
+                OnPropertyChanged();
+                UserConfigFile.SetValue(_langItem, nameof(CopyRasterImages), value.ToString(), true);
+            }
+        }
+
         #endregion
 
         private void ReadSheetBrowser()
@@ -313,6 +343,8 @@
             CopyViewports = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(CopyViewports)), out b) && b;
             CopyTextNotes = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(CopyTextNotes)), out b) && b;
             UpdateExistingViewContents = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(UpdateExistingViewContents)), out b) && b;
+            CopyGenericAnnotation = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(CopyGenericAnnotation)), out b) && b;
+            CopyRasterImages = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(CopyRasterImages)), out b) && b;
         }
 
         private async void CopySheets(object o)
@@ -352,45 +384,74 @@
                         // имитация работы                        
 
                         Document dest_doc = destinationDocument.Document;
-                        FilteredElementCollector сollectorView = new FilteredElementCollector(dest_doc).OfClass(typeof(View));
-                        if (!сollectorView.Cast<View>().Where(x => x.ViewType == ViewType.Legend).Any())
+                        FilteredElementCollector сollectorViewLegend = new FilteredElementCollector(dest_doc).OfClass(typeof(View));
+                        if (!сollectorViewLegend.Cast<View>().Where(x => x.ViewType == ViewType.Legend).Any())
                         {
-                            await _mainWindow.ShowMessageAsync("Неоходимо создать легенду", string.Empty).ConfigureAwait(true);
+                            await _mainWindow.ShowMessageAsync("Необходимо создать легенду", string.Empty).ConfigureAwait(true);
                             return;
 
                         }
-
+                        
+                        //сбор контента листов для копирования
                         var viewContents = new FilteredElementCollector(doc).OwnedByView(sheet.Id);
+                        List<Element> viewPort = new List<Element>();
                         List<ElementId> viewContentsId = new List<ElementId>();
                         if (viewContents.Any())
                         {                            
-                            foreach (var item in viewContents)
+                            foreach (var itemContent in viewContents)
                             {
-                                if (item.Category != null)
-                                    if (item.Category.Name == "Основные надписи" || item.Category.Name == "Текстовые примечания")
-                                        viewContentsId.Add(item.Id);
+                                if (itemContent.Category != null)
+                                {
+                                    if (CopyTextNotes)
+                                    {
+                                        if (itemContent.Category.Id.IntegerValue == -2000300)
+                                            viewContentsId.Add(itemContent.Id);
+                                    }                                    
+                                    if (CopyGenericAnnotation)
+                                    {
+                                        if (itemContent.Category.Id.IntegerValue == -2000150)
+                                            viewContentsId.Add(itemContent.Id);
+                                    }
+                                    if (CopyTitleBlocks)
+                                    {
+                                        if (itemContent.Category.Id.IntegerValue == -2000280)
+                                            viewContentsId.Add(itemContent.Id);
+                                    }
+                                    if (itemContent.Category.Id.IntegerValue == -2000510)
+                                        viewPort.Add(itemContent);
+                                }
                             }
 
-                        }
-
-
+                        }                       
                         using (Transaction t = new Transaction(dest_doc, "Create"))
                         {
+                            await Task.Delay(100).ConfigureAwait(true);
+                            ProgressText = $"Copy sheet {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
                             CopyPasteOptions cp_options = new CopyPasteOptions();
                             cp_options.SetDuplicateTypeNamesHandler(new Helpers.CopyUseDestination());
                             t.Start();
                             //ViewDrafting.Create(dest_doc, dest_doc.GetDefaultElementTypeId(ElementTypeGroup.ViewTypeDrafting));
+                            List<ElementId> ara = new List<ElementId>();
+                            ara.Add(new ElementId(998214));
+                            ElementTransformUtils.CopyElements(doc, ara, dest_doc, null, cp_options);
                             ViewSheet newViewSheet = ViewSheet.Create(dest_doc, ElementId.InvalidElementId);
                             if (newViewSheet != null)
                             {
                                 newViewSheet.get_Parameter(BuiltInParameter.SHEET_NAME).Set(browserSheet.SheetName);
                                 newViewSheet.get_Parameter(BuiltInParameter.SHEET_NUMBER).Set(browserSheet.SheetNumber);
-                                ElementTransformUtils.CopyElements(sheet, viewContentsId, newViewSheet, null, cp_options);
+                                if (viewContentsId.Any())
+                                {
+                                    ElementTransformUtils.CopyElements(sheet, viewContentsId, newViewSheet, null, cp_options);
+                                }
+                                if (CopyGuideGrids)
+                                {
+                                    await Task.Delay(100).ConfigureAwait(true);
+                                    ProgressText = $"Copy guide grid {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+                                    copy_guideGrids(doc, sheet, newViewSheet, dest_doc, cp_options);
+                                }                                
                             }
                             t.Commit();
-                        }
-                        await Task.Delay(500).ConfigureAwait(true);
-                        ProgressText = $"Copy sheet {browserSheet.SheetNumber}-{browserSheet.SheetName} to document {destinationDocument.Title}";
+                        }                      
                         progressIndex++;
                         ProgressValue = progressIndex;
                         
@@ -410,7 +471,7 @@
             IsWork = false;
         }
 
-        private static bool copySheet(Document activeDocument, ViewSheet sheet, Document destinationDocument)
+        private static bool copy_sheet(Document activeDocument, ViewSheet sheet, Document destinationDocument)
         {
             var new_view = ViewDrafting.Create(destinationDocument, activeDocument.GetDefaultElementTypeId(ElementTypeGroup.ViewTypeDrafting));
             return true;
@@ -419,6 +480,23 @@
         private static void copy_view(Document activeDocument, ViewSheet sheet, Document destinationDocument)
         {
 
+        }
+        private static bool copy_guideGrids(Document activeDocument, ViewSheet sheet, ViewSheet sheetNew, Document destinationDocument, CopyPasteOptions cp_options)
+        {
+            ElementId GuideGridsId = sheet.get_Parameter(BuiltInParameter.SHEET_GUIDE_GRID).AsElementId();
+            if (GuideGridsId != ElementId.InvalidElementId)
+            {
+                List<ElementId> sheetGuideGridsId = new List<ElementId>();
+                sheetGuideGridsId.Add(GuideGridsId);
+                ElementTransformUtils.CopyElements(activeDocument, sheetGuideGridsId, destinationDocument, null, cp_options);
+                var guide_elements = new FilteredElementCollector(destinationDocument).OfCategory(BuiltInCategory.OST_GuideGrid).WhereElementIsNotElementType().Where(x => x.Name == activeDocument.GetElement(GuideGridsId).Name);
+                if (guide_elements.Any())
+                {
+                    sheetNew.get_Parameter(BuiltInParameter.SHEET_GUIDE_GRID).Set(guide_elements.First().Id);
+                }
+            }
+
+            return true;
         }
     }
 }

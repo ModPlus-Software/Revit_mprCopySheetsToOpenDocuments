@@ -105,6 +105,12 @@
                               IsChecked="{Binding Path=CopyTextNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                     <CheckBox Content="Update Existing View Contents"
                               IsChecked="{Binding Path=UpdateExistingViewContents, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                    <CheckBox Content="Copy Generic Annotations"
+                              IsChecked="{Binding Path=CopyGenericAnnotation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                    <CheckBox Content="Copy Raster Images"
+                              IsChecked="{Binding Path=CopyRasterImages, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                    
+                    
                 </StackPanel>
             </GroupBox>
         </Grid>
