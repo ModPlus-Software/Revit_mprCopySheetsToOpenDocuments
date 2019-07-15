@@ -24,6 +24,7 @@
         private int _progressMaximum = 1;
         private string _progressText = string.Empty;
         private int _progressValue;
+        private static List<int> IdElementAddYetModel = new List<int>();
 
         /// <summary>
         /// Main constructor
@@ -224,21 +225,7 @@
             }
         }
 
-        private bool _copyRasterImages;
-
-        /// <summary></summary>
-        public bool CopyRasterImages
-        {
-            get => _copyRasterImages;
-            set
-            {
-                if (Equals(value, _copyRasterImages)) return;
-                _copyRasterImages = value;
-                OnPropertyChanged();
-                UserConfigFile.SetValue(_langItem, nameof(CopyRasterImages), value.ToString(), true);
-            }
-        }
-
+       
         #endregion
 
         private void ReadSheetBrowser()
@@ -344,7 +331,7 @@
             CopyTextNotes = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(CopyTextNotes)), out b) && b;
             UpdateExistingViewContents = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(UpdateExistingViewContents)), out b) && b;
             CopyGenericAnnotation = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(CopyGenericAnnotation)), out b) && b;
-            CopyRasterImages = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(CopyRasterImages)), out b) && b;
+            
         }
 
         private async void CopySheets(object o)
@@ -394,7 +381,6 @@
                         
                         //сбор контента листов для копирования
                         var viewContents = new FilteredElementCollector(doc).OwnedByView(sheet.Id);
-                        List<Element> viewPort = new List<Element>();
                         List<ElementId> viewContentsId = new List<ElementId>();
                         if (viewContents.Any())
                         {                            
@@ -416,9 +402,7 @@
                                     {
                                         if (itemContent.Category.Id.IntegerValue == -2000280)
                                             viewContentsId.Add(itemContent.Id);
-                                    }
-                                    if (itemContent.Category.Id.IntegerValue == -2000510)
-                                        viewPort.Add(itemContent);
+                                    }                                    
                                 }
                             }
 
@@ -431,9 +415,7 @@
                             cp_options.SetDuplicateTypeNamesHandler(new Helpers.CopyUseDestination());
                             t.Start();
                             //ViewDrafting.Create(dest_doc, dest_doc.GetDefaultElementTypeId(ElementTypeGroup.ViewTypeDrafting));
-                            List<ElementId> ara = new List<ElementId>();
-                            ara.Add(new ElementId(998214));
-                            ElementTransformUtils.CopyElements(doc, ara, dest_doc, null, cp_options);
+                            
                             ViewSheet newViewSheet = ViewSheet.Create(dest_doc, ElementId.InvalidElementId);
                             if (newViewSheet != null)
                             {
@@ -448,7 +430,15 @@
                                     await Task.Delay(100).ConfigureAwait(true);
                                     ProgressText = $"Copy guide grid {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
                                     copy_guideGrids(doc, sheet, newViewSheet, dest_doc, cp_options);
-                                }                                
+                                }
+                                if (CopyViewports)
+                                {
+                                    await Task.Delay(100).ConfigureAwait(true);
+                                    ProgressText = $"Copy sheet viewports   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+                                    copy_view(doc, sheet, dest_doc, cp_options);
+                                    copy_viewportstype(doc, sheet, dest_doc, cp_options);
+                                    copy_viewports(doc, sheet, newViewSheet, dest_doc, cp_options);
+                                }
                             }
                             t.Commit();
                         }                      
@@ -477,24 +467,51 @@
             return true;
         }
 
-        private static void copy_view(Document activeDocument, ViewSheet sheet, Document destinationDocument)
-        {
-
-        }
-
-        private static void copy_viewports(Document activeDocument, ViewSheet sheet, Document destinationDocument)
+        private static void copy_view(Document activeDocument, ViewSheet sheet, Document destinationDocument, CopyPasteOptions cp_options)
         {
             var viewPortsId = sheet.GetAllViewports();
-            var viewPorts = new List<Viewport>();
+            var viewPortsContents = new List<ElementId>();
+
             if (viewPortsId.Any())
             {
                 foreach (var viewPortId in viewPortsId)
                 {
-                    viewPorts.Add((activeDocument.GetElement(viewPortId) as Viewport));
+                    Viewport viewport = activeDocument.GetElement(viewPortId) as Viewport;
+                    var viewportItem = activeDocument.GetElement(viewport.ViewId);
+                    if (viewportItem is ImageView)
+                    {
+                        viewPortsContents.Add(viewportItem.Id);
+                    }
+                    if ((viewportItem as View).ViewType == ViewType.FloorPlan)
+                    {
+                        viewPortsContents.Add(viewportItem.Id);
+                    }
+                }
+                if (viewPortsContents.Any())
+                {
+                    ElementTransformUtils.CopyElements(activeDocument, viewPortsContents, destinationDocument, null, cp_options);
                 }
             }
         }
 
+        private static void copy_viewports(Document activeDocument, ViewSheet sheet, ViewSheet sheetNew, Document destinationDocument, CopyPasteOptions cp_options)
+        {
+            var viewPortsId = sheet.GetAllViewports();
+            
+            if (viewPortsId.Any())
+            {
+                foreach (var viewPortId in viewPortsId)
+                {
+                    Viewport viewport = activeDocument.GetElement(viewPortId) as Viewport;
+                    var viewportItem = activeDocument.GetElement(viewport.ViewId);
+                    var viewId = Helpers.FilterByName.FilterElementByNameEqualsCollector(BuiltInParameter.VIEW_NAME, viewportItem.Name, destinationDocument).FirstOrDefault(x => x.Name == viewportItem.Name).Id;
+                    string nameType = viewport.get_Parameter(BuiltInParameter.ELEM_TYPE_PARAM).AsValueString();
+                    var viewPortType = Helpers.FilterByName.FilterElementByNameEqualsCollector(BuiltInParameter.ALL_MODEL_TYPE_NAME, nameType, destinationDocument).OfClass(typeof(ElementType)).FirstOrDefault(x => x.Name == nameType).Id;
+                    var newViewPort = Viewport.Create(destinationDocument, sheetNew.Id, viewId, viewport.GetBoxCenter());
+                    newViewPort.ChangeTypeId(viewPortType);
+                }
+            }
+        }
         private static bool copy_guideGrids(Document activeDocument, ViewSheet sheet, ViewSheet sheetNew, Document destinationDocument, CopyPasteOptions cp_options)
         {
             ElementId GuideGridsId = sheet.get_Parameter(BuiltInParameter.SHEET_GUIDE_GRID).AsElementId();
@@ -505,12 +522,40 @@
                 ElementTransformUtils.CopyElements(activeDocument, sheetGuideGridsId, destinationDocument, null, cp_options);
                 var guide_elements = new FilteredElementCollector(destinationDocument).OfCategory(BuiltInCategory.OST_GuideGrid).WhereElementIsNotElementType().Where(x => x.Name == activeDocument.GetElement(GuideGridsId).Name);
                 if (guide_elements.Any())
-                {
+                {                    
                     sheetNew.get_Parameter(BuiltInParameter.SHEET_GUIDE_GRID).Set(guide_elements.First().Id);
                 }
             }
 
             return true;
         }
+
+        private static void copy_viewportstype(Document activeDocument, ViewSheet sheet, Document destinationDocument, CopyPasteOptions cp_options)
+        {
+            var viewPortsId = sheet.GetAllViewports();
+            var viewPortsTypes = new List<ElementId>();
+            foreach (var viewPortId in viewPortsId)
+            {
+                Viewport viewport = activeDocument.GetElement(viewPortId) as Viewport;
+                if (!IdElementAddYetModel.Contains(viewport.GetTypeId().IntegerValue))
+                {
+                    viewPortsTypes.Add(viewport.GetTypeId());
+                }
+                IdElementAddYetModel.Add(viewport.GetTypeId().IntegerValue);
+            }
+            if (viewPortsTypes.Any())
+            {
+                ElementTransformUtils.CopyElements(activeDocument, viewPortsTypes, destinationDocument, null, cp_options);
+            }           
+        }
+
+        private static bool copyNameMatchCheckImageView(BuiltInParameter bip, String searchText, Document destinationDocument)
+        {
+            bool result = true;
+            
+            
+            return result;
+        }
+
     }
 }

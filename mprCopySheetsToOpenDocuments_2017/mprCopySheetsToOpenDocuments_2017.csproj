@@ -63,6 +63,9 @@
     <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\CopyUseDestination.cs">
       <Link>Helpers\CopyUseDestination.cs</Link>
     </Compile>
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\FilterByName.cs">
+      <Link>Helpers\FilterByName.cs</Link>
+    </Compile>
     <Compile Include="..\mprcopysheetstoopendocuments_2015\helpers\OrdinalStringComparer.cs">
       <Link>Helpers\OrdinalStringComparer.cs</Link>
     </Compile>
