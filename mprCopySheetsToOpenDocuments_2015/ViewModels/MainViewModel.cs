@@ -24,7 +24,7 @@
         private int _progressMaximum = 1;
         private string _progressText = string.Empty;
         private int _progressValue;
-        private static List<int> IdElementAddYetModel = new List<int>();
+        
 
         /// <summary>
         /// Main constructor
@@ -382,6 +382,7 @@
                         //сбор контента листов для копирования
                         var viewContents = new FilteredElementCollector(doc).OwnedByView(sheet.Id);
                         List<ElementId> viewContentsId = new List<ElementId>();
+                        List<ScheduleSheetInstance> scheduleSheetInstances = new List<ScheduleSheetInstance>();
                         if (viewContents.Any())
                         {                            
                             foreach (var itemContent in viewContents)
@@ -392,7 +393,7 @@
                                     {
                                         if (itemContent.Category.Id.IntegerValue == -2000300)
                                             viewContentsId.Add(itemContent.Id);
-                                    }                                    
+                                    }
                                     if (CopyGenericAnnotation)
                                     {
                                         if (itemContent.Category.Id.IntegerValue == -2000150)
@@ -402,7 +403,14 @@
                                     {
                                         if (itemContent.Category.Id.IntegerValue == -2000280)
                                             viewContentsId.Add(itemContent.Id);
-                                    }                                    
+                                    }
+                                    if (CopySchedules)
+                                    {
+                                        if (itemContent.Category.Id.IntegerValue == -2000570)
+                                        {
+                                            viewContentsId.Add(itemContent.Id);
+                                        }
+                                    }                                   
                                 }
                             }
 
@@ -431,6 +439,7 @@
                                     ProgressText = $"Copy guide grid {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
                                     copy_guideGrids(doc, sheet, newViewSheet, dest_doc, cp_options);
                                 }
+
                                 if (CopyViewports)
                                 {
                                     await Task.Delay(100).ConfigureAwait(true);
@@ -439,6 +448,7 @@
                                     copy_viewportstype(doc, sheet, dest_doc, cp_options);
                                     copy_viewports(doc, sheet, newViewSheet, dest_doc, cp_options);
                                 }
+                               
                             }
                             t.Commit();
                         }                      
@@ -484,7 +494,7 @@
                     }
                     if ((viewportItem as View).ViewType == ViewType.FloorPlan)
                     {
-                        viewPortsContents.Add(viewportItem.Id);
+                        //viewPortsContents.Add(viewportItem.Id);
                     }
                 }
                 if (viewPortsContents.Any())
@@ -502,13 +512,18 @@
             {
                 foreach (var viewPortId in viewPortsId)
                 {
+                    destinationDocument.Regenerate();
                     Viewport viewport = activeDocument.GetElement(viewPortId) as Viewport;
                     var viewportItem = activeDocument.GetElement(viewport.ViewId);
-                    var viewId = Helpers.FilterByName.FilterElementByNameEqualsCollector(BuiltInParameter.VIEW_NAME, viewportItem.Name, destinationDocument).FirstOrDefault(x => x.Name == viewportItem.Name).Id;
-                    string nameType = viewport.get_Parameter(BuiltInParameter.ELEM_TYPE_PARAM).AsValueString();
-                    var viewPortType = Helpers.FilterByName.FilterElementByNameEqualsCollector(BuiltInParameter.ALL_MODEL_TYPE_NAME, nameType, destinationDocument).OfClass(typeof(ElementType)).FirstOrDefault(x => x.Name == nameType).Id;
-                    var newViewPort = Viewport.Create(destinationDocument, sheetNew.Id, viewId, viewport.GetBoxCenter());
-                    newViewPort.ChangeTypeId(viewPortType);
+                    var viewCollector = Helpers.FilterByName.FilterElementByNameEqualsCollector(BuiltInParameter.VIEW_NAME, viewportItem.Name, destinationDocument);
+                    if (viewCollector.Any())
+                    {
+                        var viewId = viewCollector.FirstOrDefault(x => x.Name == viewportItem.Name).Id;
+                        string nameType = viewport.get_Parameter(BuiltInParameter.ELEM_TYPE_PARAM).AsValueString();
+                        var viewPortType = Helpers.FilterByName.FilterElementByNameEqualsCollector(BuiltInParameter.ALL_MODEL_TYPE_NAME, nameType, destinationDocument).OfClass(typeof(ElementType)).FirstOrDefault(x => x.Name == nameType).Id;
+                        var newViewPort = Viewport.Create(destinationDocument, sheetNew.Id, viewId, viewport.GetBoxCenter());
+                        newViewPort.ChangeTypeId(viewPortType);
+                    }
                 }
             }
         }
@@ -528,7 +543,7 @@
             }
 
             return true;
-        }
+        }  
 
         private static void copy_viewportstype(Document activeDocument, ViewSheet sheet, Document destinationDocument, CopyPasteOptions cp_options)
         {
@@ -536,12 +551,13 @@
             var viewPortsTypes = new List<ElementId>();
             foreach (var viewPortId in viewPortsId)
             {
+                destinationDocument.Regenerate();
                 Viewport viewport = activeDocument.GetElement(viewPortId) as Viewport;
-                if (!IdElementAddYetModel.Contains(viewport.GetTypeId().IntegerValue))
+                string searchText = activeDocument.GetElement(viewport.GetTypeId()).get_Parameter(BuiltInParameter.ALL_MODEL_TYPE_NAME).AsString();
+                if (сheckNameElement(BuiltInParameter.ALL_MODEL_TYPE_NAME, searchText, destinationDocument))
                 {
                     viewPortsTypes.Add(viewport.GetTypeId());
-                }
-                IdElementAddYetModel.Add(viewport.GetTypeId().IntegerValue);
+                }                
             }
             if (viewPortsTypes.Any())
             {
@@ -551,9 +567,20 @@
 
         private static bool copyNameMatchCheckImageView(BuiltInParameter bip, String searchText, Document destinationDocument)
         {
-            bool result = true;
+            bool result = false;
             
             
+            return result;
+        }
+
+        private static bool сheckNameElement(BuiltInParameter bip, String searchText, Document destinationDocument)
+        {
+            bool result = false;            
+            var collectore = Helpers.FilterByName.FilterElementByNameEqualsCollector(bip, searchText, destinationDocument).FirstOrDefault(x => x.Name == searchText);
+            if (collectore == null)
+            {
+                result = true;
+            }
             return result;
         }
 
