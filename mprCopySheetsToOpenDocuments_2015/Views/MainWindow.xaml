@@ -97,8 +97,10 @@
                               IsChecked="{Binding Path=CopySheetRevisions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                     <CheckBox Content="Copy Schedules"
                               IsChecked="{Binding Path=CopySchedules, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox Content="Copy viewports"
-                              IsChecked="{Binding Path=CopyViewports, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                    <CheckBox Content="Copy image view"
+                              IsChecked="{Binding Path=CopyImageView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                    <CheckBox Content="Copy drafting view"
+                              IsChecked="{Binding Path=CopyDraftingView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>                    
                     <CheckBox Content="Copy sheet TitleBlocks"
                               IsChecked="{Binding Path=CopyTitleBlocks, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                     <CheckBox Content="Copy Text Notes"
