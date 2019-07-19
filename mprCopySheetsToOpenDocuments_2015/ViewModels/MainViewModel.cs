@@ -438,8 +438,6 @@
                             CopyPasteOptions cp_options = new CopyPasteOptions();
                             cp_options.SetDuplicateTypeNamesHandler(new Helpers.CopyUseDestination());
                             t.Start();
-                            //ViewDrafting.Create(dest_doc, dest_doc.GetDefaultElementTypeId(ElementTypeGroup.ViewTypeDrafting));
-                            
                             ViewSheet newViewSheet = ViewSheet.Create(dest_doc, ElementId.InvalidElementId);
                             if (newViewSheet != null)
                             {
@@ -466,9 +464,7 @@
                                 {
                                     await Task.Delay(100).ConfigureAwait(true);
                                     ProgressText = $"Copy sheet viewports   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
-                                    copy_ImageView(doc, sheet, dest_doc, cp_options);
-                                    //copy_viewportstype(doc, sheet, dest_doc, cp_options);
-                                    //copy_viewports(doc, sheet, newViewSheet, dest_doc, cp_options);
+                                    copy_ImageView(doc, sheet, newViewSheet, dest_doc, cp_options);                                    
                                 }
                                
                             }
@@ -538,19 +534,15 @@
                             var viewPortType = Helpers.FilterByName.FilterElementByNameEqualsCollector(BuiltInParameter.ALL_MODEL_TYPE_NAME, nameType, destinationDocument).OfClass(typeof(ElementType)).First().Id;
                             newViewPort.ChangeTypeId(viewPortType);
                         }
-                        
-
                     }
                 }
-                
-                
             }
         }
 
-        private static void copy_ImageView(Document activeDocument, ViewSheet sheet, Document destinationDocument, CopyPasteOptions cp_options)
+        private static void copy_ImageView(Document activeDocument, ViewSheet sheet, ViewSheet sheetNew, Document destinationDocument, CopyPasteOptions cp_options)
         {
             var viewPortsId = sheet.GetAllViewports();
-            var viewPortsContents = new List<ElementId>();
+            
 
             if (viewPortsId.Any())
             {
@@ -559,9 +551,22 @@
                     Viewport viewport = activeDocument.GetElement(viewPortId) as Viewport;
                     var viewportItem = activeDocument.GetElement(viewport.ViewId);
                     if (viewportItem is ImageView)
-                    {
-                        viewPortsContents.Add(viewportItem.Id);
+                    {                        
                         var ImageViewId = ElementTransformUtils.CopyElements(activeDocument, new List<ElementId>() { viewportItem.Id}, destinationDocument, null, cp_options);
+                        destinationDocument.Regenerate();
+                        string searchText = activeDocument.GetElement(viewport.GetTypeId()).get_Parameter(BuiltInParameter.ALL_MODEL_TYPE_NAME).AsString();
+                        var newViewPort = Viewport.Create(destinationDocument, sheetNew.Id, ImageViewId.First(), viewport.GetBoxCenter());
+                        if (сheckNameElement(BuiltInParameter.ALL_MODEL_TYPE_NAME, searchText, destinationDocument))
+                        {
+                            var viewPortsTypeIds = ElementTransformUtils.CopyElements(activeDocument, new List<ElementId>() { viewport.GetTypeId() }, destinationDocument, null, cp_options);
+                            newViewPort.ChangeTypeId(viewPortsTypeIds.First());
+                        }
+                        else
+                        {
+                            string nameType = viewport.get_Parameter(BuiltInParameter.ELEM_TYPE_PARAM).AsValueString();
+                            var viewPortType = Helpers.FilterByName.FilterElementByNameEqualsCollector(BuiltInParameter.ALL_MODEL_TYPE_NAME, nameType, destinationDocument).OfClass(typeof(ElementType)).First().Id;
+                            newViewPort.ChangeTypeId(viewPortType);
+                        }
                     }                    
                 }
                 
@@ -628,15 +633,7 @@
                 ElementTransformUtils.CopyElements(activeDocument, viewPortsTypes, destinationDocument, null, cp_options);
             }           
         }
-
-        private static bool copyNameMatchCheckImageView(BuiltInParameter bip, String searchText, Document destinationDocument)
-        {
-            bool result = false;
-            
-            
-            return result;
-        }
-
+                
         private static bool сheckNameElement(BuiltInParameter bip, String searchText, Document destinationDocument)
         {
             bool result = false;            
