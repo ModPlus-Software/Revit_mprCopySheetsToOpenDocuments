@@ -91,26 +91,28 @@
             <GroupBox Grid.Row="1"
                       Header="Settings">
                 <StackPanel Orientation="Vertical">
+                    <CheckBox Content="Copy sheet TitleBlocks"
+                              IsChecked="{Binding Path=CopyTitleBlocks, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                    <CheckBox Content="Copy Schedules"
+                              IsChecked="{Binding Path=CopySchedules, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                    <CheckBox Content="Copy Legend"
+                              IsChecked="{Binding Path=CopyLegend, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                    <CheckBox Content="Copy image view"
+                              IsChecked="{Binding Path=CopyImageView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                    <CheckBox Content="Copy drafting view"
+                              IsChecked="{Binding Path=CopyDraftingView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>                                        
+                    <CheckBox Content="Copy Text Notes"
+                              IsChecked="{Binding Path=CopyTextNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>                    
+                    <CheckBox Content="Copy Generic Annotations"
+                              IsChecked="{Binding Path=CopyGenericAnnotation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                     <CheckBox Content="Copy Guide Grids"
                               IsChecked="{Binding Path=CopyGuideGrids, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                     <CheckBox Content="Copy and Set Sheet Revisions"
                               IsChecked="{Binding Path=CopySheetRevisions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox Content="Copy Schedules"
-                              IsChecked="{Binding Path=CopySchedules, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox Content="Copy image view"
-                              IsChecked="{Binding Path=CopyImageView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox Content="Copy drafting view"
-                              IsChecked="{Binding Path=CopyDraftingView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>                    
-                    <CheckBox Content="Copy sheet TitleBlocks"
-                              IsChecked="{Binding Path=CopyTitleBlocks, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox Content="Copy Text Notes"
-                              IsChecked="{Binding Path=CopyTextNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                     <CheckBox Content="Update Existing View Contents"
                               IsChecked="{Binding Path=UpdateExistingViewContents, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox Content="Copy Generic Annotations"
-                              IsChecked="{Binding Path=CopyGenericAnnotation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>         
-                    
-                    
+
+
                 </StackPanel>
             </GroupBox>
         </Grid>

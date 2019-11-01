@@ -34,21 +34,21 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="ModPlusAPI">
-      <HintPath>..\..\..\..\..\..\..\ModPlus\Extensions\ModPlusAPI.dll</HintPath>
+      <HintPath>C:\ModPlus\Extensions\ModPlusAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ModPlusStyle">
-      <HintPath>..\..\..\..\..\..\..\ModPlus\Extensions\ModPlusStyle.dll</HintPath>
+      <HintPath>C:\ModPlus\Extensions\ModPlusStyle.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="RevitAPI">
-      <HintPath>C:\_Revit dlls\2019\RevitAPI.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files\Autodesk\Revit 2019\RevitAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitAPIUI">
-      <HintPath>C:\_Revit dlls\2019\RevitAPIUI.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files\Autodesk\Revit 2019\RevitAPIUI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -64,8 +64,14 @@
     <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\CopyUseDestination.cs">
       <Link>Helpers\CopyUseDestination.cs</Link>
     </Compile>
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\FilterByName.cs">
+      <Link>Helpers\FilterByName.cs</Link>
+    </Compile>
     <Compile Include="..\mprcopysheetstoopendocuments_2015\helpers\OrdinalStringComparer.cs">
       <Link>Helpers\OrdinalStringComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\UtilCopy.cs">
+      <Link>Helpers\UtilCopy.cs</Link>
     </Compile>
     <Compile Include="..\mprcopysheetstoopendocuments_2015\models\BrowserSheet.cs">
       <Link>Models\BrowserSheet.cs</Link>

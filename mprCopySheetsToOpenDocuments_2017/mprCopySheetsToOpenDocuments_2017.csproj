@@ -69,6 +69,9 @@
     <Compile Include="..\mprcopysheetstoopendocuments_2015\helpers\OrdinalStringComparer.cs">
       <Link>Helpers\OrdinalStringComparer.cs</Link>
     </Compile>
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\UtilCopy.cs">
+      <Link>Helpers\UtilCopy.cs</Link>
+    </Compile>
     <Compile Include="..\mprcopysheetstoopendocuments_2015\models\BrowserSheet.cs">
       <Link>Models\BrowserSheet.cs</Link>
     </Compile>
