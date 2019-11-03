@@ -225,7 +225,7 @@
                 UserConfigFile.SetValue(_langItem, nameof(CopyDraftingView), value.ToString(), true);
             }
         }
-        
+
         /// <summary>
         /// Копировать текст
         /// </summary>
@@ -273,7 +273,7 @@
                 UserConfigFile.SetValue(_langItem, nameof(CopyGenericAnnotation), value.ToString(), true);
             }
         }
-        
+
         /// <summary>
         /// Копировать легенды
         /// </summary>
@@ -326,14 +326,20 @@
                         var topGroup = browserSheetGroups.FirstOrDefault(g => g.ParentGroup == null && folderItems.First().Name == g.Name);
                         if (topGroup == null)
                         {
-                            topGroup = new BrowserSheetGroup(folderItems.First().Name, null);
+                            topGroup = new BrowserSheetGroup(folderItems.First().Name, null)
+                            {
+                                IsExpanded = true
+                            };
                             browserSheetGroups.Add(topGroup);
                         }
 
                         var childGroups = new List<BrowserSheetGroup> { topGroup };
                         for (var i = 1; i < folderItems.Count; i++)
                         {
-                            var childGroup = new BrowserSheetGroup(folderItems[i].Name, childGroups.Last());
+                            var childGroup = new BrowserSheetGroup(folderItems[i].Name, childGroups.Last())
+                            {
+                                IsExpanded = true
+                            };
                             childGroups.Last().SubItems.Add(childGroup);
                             childGroups.Add(childGroup);
                             browserSheetGroups.Add(childGroup);
@@ -350,7 +356,10 @@
 
             if (notGroupingSheetIds.Any())
             {
-                var browserSheetGroup = new BrowserSheetGroup("???", null);
+                var browserSheetGroup = new BrowserSheetGroup("???", null)
+                {
+                    IsExpanded = true
+                };
                 foreach (var sheetId in notGroupingSheetIds)
                 {
                     var sheet = (ViewSheet)doc.GetElement(sheetId);
@@ -404,10 +413,10 @@
         }
 
         private async void CopySheets(object o)
-        {            
+        {
             var selectedSheets = SheetGroups
                 .SelectMany(g => g.SubItems.Where(i => i is BrowserSheet sheet && sheet.Checked).Cast<BrowserSheet>())
-                .ToList();           
+                .ToList();
             if (!selectedSheets.Any())
             {
                 await _mainWindow.ShowMessageAsync("Нужно выбрать листы!", string.Empty).ConfigureAwait(true);
@@ -428,134 +437,164 @@
             var doc = _uiApplication.ActiveUIDocument.Document;
             var progressIndex = 0;
 
-            foreach (var browserSheet in selectedSheets)
+            foreach (var destinationDocument in destinationDocuments)
             {
-                var sheet = doc.GetElement(browserSheet.Id) as ViewSheet;
+                var destDoc = destinationDocument.Document;
+                var ignoreLegends = false;
 
-                foreach (var destinationDocument in destinationDocuments)
+                using (var transactionGroup = new TransactionGroup(destDoc, "Name of plugin"))
                 {
-                    // Каждую итерацию оборачиваем в try{} catch{} чтобы в случае ошибки не прерывалась работа
-                    try
+                    transactionGroup.Start();
+
+                    if (CopyLegend)
                     {
-                        Document destDoc = destinationDocument.Document;
-                        FilteredElementCollector сollectorViewLegend = new FilteredElementCollector(destDoc).OfClass(typeof(View));
+                        var сollectorViewLegend = new FilteredElementCollector(destDoc).OfClass(typeof(View));
                         if (сollectorViewLegend.Cast<View>().All(x => x.ViewType != ViewType.Legend))
                         {
-                            await _mainWindow.ShowMessageAsync("Необходимо создать легенду", string.Empty).ConfigureAwait(true);
-                            return;
-                        }
-                        
-                        // сбор контента листов для копирования
-                        var viewContents = new FilteredElementCollector(doc).OwnedByView(sheet.Id);
-                        List<ElementId> viewContentsId = new List<ElementId>();
-                        if (viewContents.Any())
-                        {                            
-                            foreach (var itemContent in viewContents)
+                            var dialogResult = await _mainWindow.ShowMessageAsync(
+                                $"Для копирования легенд в документе \"{destDoc.Title}\" необходимо создать легенду",
+                                "Продолжить копирование листов?",
+                                MessageDialogStyle.AffirmativeAndNegative,
+                                new MetroDialogSettings
+                                {
+                                    AffirmativeButtonText = "Да",
+                                    NegativeButtonText = "Нет"
+                                }).ConfigureAwait(true);
+                            if (dialogResult == MessageDialogResult.Affirmative)
                             {
-                                if (itemContent.Category != null)
-                                {
-                                    if (CopyTextNotes && itemContent.Category.Id.IntegerValue == -2000300)
-                                    {
-                                      viewContentsId.Add(itemContent.Id);
-                                    }
-
-                                    if (CopyGenericAnnotation && itemContent.Category.Id.IntegerValue == -2000150)
-                                    {
-                                        viewContentsId.Add(itemContent.Id);
-                                    }
-
-                                    if (CopyTitleBlocks && itemContent.Category.Id.IntegerValue == -2000280)
-                                    {
-                                        viewContentsId.Add(itemContent.Id);
-                                    }
-
-                                    if (CopySchedules && itemContent.Category.Id.IntegerValue == -2000570)
-                                    {
-                                        viewContentsId.Add(itemContent.Id);                                        
-                                    }                                   
-                                }
+                                ignoreLegends = true;
                             }
-                        }                       
-
-                        using (Transaction tr = new Transaction(destDoc, "Create"))
-                        {
-                            await Task.Delay(500).ConfigureAwait(true);
-                            ProgressText = $"Copy sheet {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
-
-                            CopyPasteOptions cpOptions = new CopyPasteOptions();
-                            cpOptions.SetDuplicateTypeNamesHandler(new CopyUseDestination());
-
-                            tr.Start();
-
-                            var viewSheets = new FilteredElementCollector(destDoc).OfClass(typeof(ViewSheet));
-                            var newNumber = UtilCopy.GetSuffixNumberViewSheet(viewSheets.ToList(), browserSheet.SheetNumber);
-
-                            ViewSheet newViewSheet = ViewSheet.Create(destDoc, ElementId.InvalidElementId);
-                            if (newViewSheet != null)
-                            {                    
-                                newViewSheet.get_Parameter(BuiltInParameter.SHEET_NAME).Set(browserSheet.SheetName);
-                                newViewSheet.get_Parameter(BuiltInParameter.SHEET_NUMBER).Set(newNumber);
-
-                                if (viewContentsId.Any())
-                                {
-                                    ElementTransformUtils.CopyElements(sheet, viewContentsId, newViewSheet, null, cpOptions);
-                                }
-
-                                if (CopyLegend)
-                                {
-                                    await Task.Delay(500).ConfigureAwait(true);
-                                    ProgressText = $"Copy legend {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
-                                    UtilCopy.CopyLegend(doc, sheet, newViewSheet, destDoc, cpOptions);
-                                }
-
-                                if (CopyGuideGrids)
-                                {
-                                    await Task.Delay(500).ConfigureAwait(true);
-                                    ProgressText = $"Copy guide grid {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
-                                    UtilCopy.CopyGuideGrids(doc, sheet, newViewSheet, destDoc, cpOptions);
-                                }
-
-                                if (CopyDraftingView)
-                                {
-                                    await Task.Delay(500).ConfigureAwait(true);
-                                    ProgressText = $"Copy drafting view   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
-                                    UtilCopy.CopyDraftingView(doc, sheet, newViewSheet, destDoc, cpOptions);
-                                }
-
-                                if (CopyImageView)
-                                {
-                                    await Task.Delay(500).ConfigureAwait(true);
-                                    ProgressText = $"Copy sheet imageview   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
-                                    UtilCopy.CopyImageView(doc, sheet, newViewSheet, destDoc, cpOptions);                                    
-                                }
-
-                                if (CopySheetRevisions)
-                                {
-                                    await Task.Delay(500).ConfigureAwait(true);
-                                    ProgressText = $"Copy sheet revisions   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
-                                    UtilCopy.CopySheetRevisions(doc, sheet, newViewSheet, destDoc);
-                                }
+                            else
+                            {
+                                continue;
                             }
-
-                            tr.Commit();
-                        }                      
-
-                        progressIndex++;
-                        ProgressValue = progressIndex;
+                        }
                     }
-                    catch (Exception exception)
+
+                    foreach (var browserSheet in selectedSheets)
                     {
-                        ExceptionBox.Show(exception);
+                        var sheet = doc.GetElement(browserSheet.Id) as ViewSheet;
+
+                        // Каждую итерацию оборачиваем в try{} catch{} чтобы в случае ошибки не прерывалась работа
+                        try
+                        {
+                            // сбор контента листов для копирования
+                            var viewContents = new FilteredElementCollector(doc).OwnedByView(sheet.Id);
+                            var viewContentsId = new List<ElementId>();
+                            if (viewContents.Any())
+                            {
+                                foreach (var itemContent in viewContents)
+                                {
+                                    if (itemContent.Category != null)
+                                    {
+                                        if (CopyTextNotes && itemContent.Category.Id.IntegerValue == -2000300)
+                                        {
+                                            viewContentsId.Add(itemContent.Id);
+                                        }
+
+                                        if (CopyGenericAnnotation && itemContent.Category.Id.IntegerValue == -2000150)
+                                        {
+                                            viewContentsId.Add(itemContent.Id);
+                                        }
+
+                                        if (CopyTitleBlocks && itemContent.Category.Id.IntegerValue == -2000280)
+                                        {
+                                            viewContentsId.Add(itemContent.Id);
+                                        }
+
+                                        if (CopySchedules && itemContent.Category.Id.IntegerValue == -2000570)
+                                        {
+                                            viewContentsId.Add(itemContent.Id);
+                                        }
+                                    }
+                                }
+                            }
+
+                            using (var tr = new Transaction(destDoc, "Create"))
+                            {
+                                await Task.Delay(100).ConfigureAwait(true);
+                                ProgressText = $"Copy sheet {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+
+                                var cpOptions = new CopyPasteOptions();
+                                cpOptions.SetDuplicateTypeNamesHandler(new CopyUseDestination());
+
+                                tr.Start();
+
+                                var viewSheets = new FilteredElementCollector(destDoc).OfClass(typeof(ViewSheet));
+                                var newNumber = UtilCopy.GetSuffixNumberViewSheet(viewSheets.ToList(), browserSheet.SheetNumber);
+
+                                var newViewSheet = ViewSheet.Create(destDoc, ElementId.InvalidElementId);
+                                if (newViewSheet != null)
+                                {
+                                    newViewSheet.get_Parameter(BuiltInParameter.SHEET_NAME).Set(browserSheet.SheetName);
+                                    newViewSheet.get_Parameter(BuiltInParameter.SHEET_NUMBER).Set(newNumber);
+
+                                    if (viewContentsId.Any())
+                                    {
+                                        ElementTransformUtils.CopyElements(sheet, viewContentsId, newViewSheet, null, cpOptions);
+                                    }
+
+                                    if (CopyLegend && !ignoreLegends)
+                                    {
+                                        await Task.Delay(100).ConfigureAwait(true);
+                                        ProgressText = $"Copy legend {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+                                        UtilCopy.CopyLegend(doc, sheet, newViewSheet, destDoc, cpOptions);
+                                    }
+
+                                    if (CopyGuideGrids)
+                                    {
+                                        await Task.Delay(100).ConfigureAwait(true);
+                                        ProgressText = $"Copy guide grid {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+                                        UtilCopy.CopyGuideGrids(doc, sheet, newViewSheet, destDoc, cpOptions);
+                                    }
+
+                                    if (CopyDraftingView)
+                                    {
+                                        await Task.Delay(100).ConfigureAwait(true);
+                                        ProgressText = $"Copy drafting view   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+                                        UtilCopy.CopyDraftingView(doc, sheet, newViewSheet, destDoc, cpOptions);
+                                    }
+
+                                    if (CopyImageView)
+                                    {
+                                        await Task.Delay(100).ConfigureAwait(true);
+                                        ProgressText = $"Copy sheet imageview   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+                                        UtilCopy.CopyImageView(doc, sheet, newViewSheet, destDoc, cpOptions);
+                                    }
+
+                                    if (CopySheetRevisions)
+                                    {
+                                        await Task.Delay(100).ConfigureAwait(true);
+                                        ProgressText = $"Copy sheet revisions   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+                                        UtilCopy.CopySheetRevisions(doc, sheet, newViewSheet, destDoc);
+                                    }
+                                }
+
+                                tr.Commit();
+                            }
+
+                            progressIndex++;
+                            ProgressValue = progressIndex;
+                        }
+                        catch (Exception exception)
+                        {
+                            ExceptionBox.Show(exception);
+                        }
                     }
+                    
+                    transactionGroup.Assimilate();
                 }
             }
 
-            // clear progress
+            ClearProgress();
+            IsWork = false;
+        }
+
+        private void ClearProgress()
+        {
             ProgressMaximum = 1;
             ProgressValue = 0;
             ProgressText = string.Empty;
-
-            IsWork = false;
         }
     }
 }

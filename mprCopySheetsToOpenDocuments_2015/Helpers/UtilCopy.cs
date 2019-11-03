@@ -87,7 +87,12 @@
         /// <param name="sheetNew">Новый лист</param>
         /// <param name="destinationDocument">Документ назначения</param>
         /// <param name="cpOptions">Опции копирования</param>
-        public static void CopyImageView(Document activeDocument, ViewSheet sheet, ViewSheet sheetNew, Document destinationDocument, CopyPasteOptions cpOptions)
+        public static void CopyImageView(
+            Document activeDocument,
+            ViewSheet sheet,
+            ViewSheet sheetNew,
+            Document destinationDocument,
+            CopyPasteOptions cpOptions)
         {
             var viewPortsId = sheet.GetAllViewports();
 
@@ -111,13 +116,17 @@
                             var newViewPort = Viewport.Create(destinationDocument, sheetNew.Id, imageViewId.First(), viewport.GetBoxCenter());
                             if (CheckElementName(BuiltInParameter.ALL_MODEL_TYPE_NAME, searchText, destinationDocument))
                             {
-                                var viewPortsTypeIds = ElementTransformUtils.CopyElements(activeDocument, new List<ElementId> { viewport.GetTypeId() }, destinationDocument, null, cpOptions);
+                                var viewPortsTypeIds = ElementTransformUtils.CopyElements(
+                                    activeDocument, new List<ElementId> { viewport.GetTypeId() }, destinationDocument, null, cpOptions);
                                 newViewPort.ChangeTypeId(viewPortsTypeIds.First());
                             }
                             else
                             {
                                 var nameType = viewport.get_Parameter(BuiltInParameter.ELEM_TYPE_PARAM).AsValueString();
-                                var viewPortType = FilterByName.FilterElementByNameEqualsCollector(BuiltInParameter.ALL_MODEL_TYPE_NAME, nameType, destinationDocument).OfClass(typeof(ElementType)).First().Id;
+                                var viewPortType = FilterByName.FilterElementByNameEqualsCollector(
+                                    BuiltInParameter.ALL_MODEL_TYPE_NAME, nameType, destinationDocument)
+                                    .OfClass(typeof(ElementType))
+                                    .First().Id;
                                 newViewPort.ChangeTypeId(viewPortType);
                             }
                         }

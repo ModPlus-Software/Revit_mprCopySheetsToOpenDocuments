@@ -50,10 +50,10 @@
         public Guid AddInId => Guid.Empty;
 
         /// <inheritdoc />
-        public string LName => "Копировать листы в открытые документы";
+        public string LName => "Копировать листы в документы";
 
         /// <inheritdoc />
-        public string Description => "Потом напишу =)";
+        public string Description => "Пакетное копирование листов в открытые документы";
 
         /// <inheritdoc />
         public string Author => "Похомов Максим";
@@ -65,7 +65,7 @@
         public bool CanAddToRibbon => true;
 
         /// <inheritdoc />
-        public string FullDescription => "И это потом напишу =)";
+        public string FullDescription => "Пакетное копирование выбранных листов из текущего документа в указанные открытые документы с возможностью указания копируемого содержимого";
 
         /// <inheritdoc />
         public string ToolTipHelpImage => string.Empty;
