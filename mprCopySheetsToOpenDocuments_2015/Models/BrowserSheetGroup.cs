@@ -7,13 +7,21 @@
     using ModPlusAPI.Annotations;
     using ModPlusAPI.Mvvm;
 
+    /// <summary>
+    /// Модель группы листов
+    /// </summary>
     public class BrowserSheetGroup : VmBase, IBrowserItem
     {
         private string _fullPath;
         private bool _checked;
         private bool _isExpanded;
 
-        public BrowserSheetGroup(string name, BrowserSheetGroup parentGroup)
+        /// <summary>
+        /// Конструктор
+        /// </summary>
+        /// <param name="name">Имя группы</param>
+        /// <param name="parentGroup">Родительская группа</param>
+        public BrowserSheetGroup(string name, [CanBeNull] BrowserSheetGroup parentGroup)
         {
             Name = name;
             ParentGroup = parentGroup;
@@ -25,6 +33,9 @@
         /// </summary>
         public string Name { get; }
 
+        /// <summary>
+        /// Родительская группа
+        /// </summary>
         [CanBeNull]
         public BrowserSheetGroup ParentGroup { get; }
 
@@ -60,12 +71,16 @@
             }
         }
 
+        /// <summary>
+        /// Возвращает строковое представление пути группы
+        /// </summary>
+        /// <returns></returns>
         public string GetFullPath()
         {
             if (_fullPath == null)
             {
-                List<string> groupNames = new List<string> { Name };
-                BrowserSheetGroup parentGroup = ParentGroup;
+                var groupNames = new List<string> { Name };
+                var parentGroup = ParentGroup;
                 while (parentGroup != null)
                 {
                     groupNames.Add(parentGroup.Name);
@@ -79,6 +94,10 @@
             return _fullPath;
         }
 
+        /// <summary>
+        /// Сортировать листы в группе
+        /// </summary>
+        /// <param name="sortOrder">Порядок сортировки</param>
         public void SortSheets(SortOrder sortOrder)
         {
             if (SubItems.Any())

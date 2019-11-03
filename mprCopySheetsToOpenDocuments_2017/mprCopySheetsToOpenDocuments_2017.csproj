@@ -31,23 +31,26 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>$(SolutionDir)\ModPlus.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ModPlusAPI">
-      <HintPath>C:\ModPlus\Extensions\ModPlusAPI.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\ModPlus\Extensions\ModPlusAPI.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ModPlusStyle">
-      <HintPath>C:\ModPlus\Extensions\ModPlusStyle.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\..\ModPlus\Extensions\ModPlusStyle.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="RevitAPI">
-      <HintPath>..\..\..\..\Program Files\Autodesk\Revit 2017\RevitAPI.dll</HintPath>
+      <HintPath>C:\_Revit dlls\2017\RevitAPI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="RevitAPIUI">
-      <HintPath>..\..\..\..\Program Files\Autodesk\Revit 2017\RevitAPIUI.dll</HintPath>
+      <HintPath>C:\_Revit dlls\2017\RevitAPIUI.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
@@ -117,6 +120,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

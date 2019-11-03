@@ -9,10 +9,14 @@
     using ViewModels;
     using Views;
 
+    /// <summary>
+    /// Команда Revit
+    /// </summary>
     [Regeneration(RegenerationOption.Manual)]
     [Transaction(TransactionMode.Manual)]
     public class Command : IExternalCommand
     {
+        /// <inheritdoc />
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             try

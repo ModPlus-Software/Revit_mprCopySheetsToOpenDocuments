@@ -8,14 +8,17 @@
     using System.Windows.Input;
     using Autodesk.Revit.DB;
     using Autodesk.Revit.UI;
+    using Helpers;
     using Models;
     using ModPlusAPI;
     using ModPlusAPI.Mvvm;
     using ModPlusAPI.Windows;
     using ModPlusStyle.Controls.Dialogs;
     using Views;
-    using Helpers;
 
+    /// <summary>
+    /// Модель представления главного окна плагина
+    /// </summary>
     public class MainViewModel : VmBase
     {
         private readonly string _langItem = ModPlusConnector.Instance.Name;
@@ -25,13 +28,22 @@
         private int _progressMaximum = 1;
         private string _progressText = string.Empty;
         private int _progressValue;
-        
+        private bool _copyGuideGrids;
+        private bool _copySheetRevisions;
+        private bool _copySchedules;
+        private bool _copyTitleBlocks;
+        private bool _copyDraftingView;
+        private bool _copyImageView;
+        private bool _copyTextNotes;
+        private bool _updateExistingViewContents;
+        private bool _copyGenericAnnotation;
+        private bool _copyLegend;
 
         /// <summary>
         /// Main constructor
         /// </summary>
-        /// <param name="uiApplication"></param>
-        /// <param name="mainWindow"></param>
+        /// <param name="uiApplication"><see cref="UIApplication"/></param>
+        /// <param name="mainWindow">Ссылка на окно</param>
         public MainViewModel(UIApplication uiApplication, MainWindow mainWindow)
         {
             _uiApplication = uiApplication;
@@ -56,49 +68,61 @@
         /// </summary>
         public ICommand CopySheetsCommand => new RelayCommand(CopySheets);
 
-        /// <summary>Текст прогресса</summary>
+        /// <summary>
+        /// Текст прогресса
+        /// </summary>
         public string ProgressText
         {
             get => _progressText;
             set
             {
-                if (Equals(value, _progressText)) return;
+                if (Equals(value, _progressText))
+                    return;
                 _progressText = value;
                 OnPropertyChanged();
             }
         }
 
-        /// <summary>Текущее значение прогресса</summary>
+        /// <summary>
+        /// Текущее значение прогресса
+        /// </summary>
         public int ProgressValue
         {
             get => _progressValue;
             set
             {
-                if (Equals(value, _progressValue)) return;
+                if (Equals(value, _progressValue))
+                    return;
                 _progressValue = value;
                 OnPropertyChanged();
             }
         }
 
-        /// <summary>Максимальное значение прогресса</summary>
+        /// <summary>
+        /// Максимальное значение прогресса
+        /// </summary>
         public int ProgressMaximum
         {
             get => _progressMaximum;
             set
             {
-                if (Equals(value, _progressMaximum)) return;
+                if (Equals(value, _progressMaximum))
+                    return;
                 _progressMaximum = value;
                 OnPropertyChanged();
             }
         }
 
-        /// <summary>True - работа начата</summary>
+        /// <summary>
+        /// True - работа начата
+        /// </summary>
         public bool IsWork
         {
             get => _isWork;
             set
             {
-                if (Equals(value, _isWork)) return;
+                if (Equals(value, _isWork))
+                    return;
                 _isWork = value;
                 OnPropertyChanged();
             }
@@ -106,157 +130,165 @@
 
         #region Copy Options
 
-        private bool _copyGuideGrids;
-
-        /// <summary></summary>
+        /// <summary>
+        /// Копировать направляющую сетку
+        /// </summary>
         public bool CopyGuideGrids
         {
             get => _copyGuideGrids;
             set
             {
-                if (Equals(value, _copyGuideGrids)) return;
+                if (Equals(value, _copyGuideGrids))
+                    return;
                 _copyGuideGrids = value;
                 OnPropertyChanged();
                 UserConfigFile.SetValue(_langItem, nameof(CopyGuideGrids), value.ToString(), true);
             }
         }
 
-        private bool _copySheetRevisions;
-
-        /// <summary></summary>
+        /// <summary>
+        /// Копировать ревизии
+        /// </summary>
         public bool CopySheetRevisions
         {
             get => _copySheetRevisions;
             set
             {
-                if (Equals(value, _copySheetRevisions)) return;
+                if (Equals(value, _copySheetRevisions))
+                    return;
                 _copySheetRevisions = value;
                 OnPropertyChanged();
                 UserConfigFile.SetValue(_langItem, nameof(CopySheetRevisions), value.ToString(), true);
             }
         }
 
-        private bool _copySchedules;
-
-        /// <summary></summary>
+        /// <summary>
+        /// Копировать спецификации
+        /// </summary>
         public bool CopySchedules
         {
             get => _copySchedules;
             set
             {
-                if (Equals(value, _copySchedules)) return;
+                if (Equals(value, _copySchedules))
+                    return;
                 _copySchedules = value;
                 OnPropertyChanged();
                 UserConfigFile.SetValue(_langItem, nameof(CopySchedules), value.ToString(), true);
             }
         }
 
-        private bool _copyTitleBlocks;
-
-        /// <summary></summary>
+        /// <summary>
+        /// Копировать основные надписи
+        /// </summary>
         public bool CopyTitleBlocks
         {
             get => _copyTitleBlocks;
             set
             {
-                if (Equals(value, _copyTitleBlocks)) return;
+                if (Equals(value, _copyTitleBlocks))
+                    return;
                 _copyTitleBlocks = value;
                 OnPropertyChanged();
                 UserConfigFile.SetValue(_langItem, nameof(CopyTitleBlocks), value.ToString(), true);
             }
         }
 
-        private bool _copyImageView;
-
-        /// <summary></summary>
+        /// <summary>
+        /// Копировать изображения
+        /// </summary>
         public bool CopyImageView
         {
             get => _copyImageView;
             set
             {
-                if (Equals(value, _copyImageView)) return;
+                if (Equals(value, _copyImageView))
+                    return;
                 _copyImageView = value;
                 OnPropertyChanged();
                 UserConfigFile.SetValue(_langItem, nameof(CopyImageView), value.ToString(), true);
             }
         }
 
-        private bool _copyDraftingView;
-
-        /// <summary></summary>
+        /// <summary>
+        /// Копировать чертежные виды
+        /// </summary>
         public bool CopyDraftingView
         {
             get => _copyDraftingView;
             set
             {
-                if (Equals(value, _copyDraftingView)) return;
+                if (Equals(value, _copyDraftingView))
+                    return;
                 _copyDraftingView = value;
                 OnPropertyChanged();
                 UserConfigFile.SetValue(_langItem, nameof(CopyDraftingView), value.ToString(), true);
             }
         }
         
-        private bool _copyTextNotes;
-
-        /// <summary></summary>
+        /// <summary>
+        /// Копировать текст
+        /// </summary>
         public bool CopyTextNotes
         {
             get => _copyTextNotes;
             set
             {
-                if (Equals(value, _copyTextNotes)) return;
+                if (Equals(value, _copyTextNotes))
+                    return;
                 _copyTextNotes = value;
                 OnPropertyChanged();
                 UserConfigFile.SetValue(_langItem, nameof(CopyTextNotes), value.ToString(), true);
             }
         }
 
-        private bool _updateExistingViewContents;
-
-        /// <summary></summary>
+        /// <summary>
+        /// Обновить содержимое существующих видов
+        /// </summary>
         public bool UpdateExistingViewContents
         {
             get => _updateExistingViewContents;
             set
             {
-                if (Equals(value, _updateExistingViewContents)) return;
+                if (Equals(value, _updateExistingViewContents))
+                    return;
                 _updateExistingViewContents = value;
                 OnPropertyChanged();
                 UserConfigFile.SetValue(_langItem, nameof(UpdateExistingViewContents), value.ToString(), true);
             }
         }
 
-        private bool _copyGenericAnnotation;
-
-        /// <summary></summary>
+        /// <summary>
+        /// Копировать аннотации
+        /// </summary>
         public bool CopyGenericAnnotation
         {
             get => _copyGenericAnnotation;
             set
             {
-                if (Equals(value, _copyGenericAnnotation)) return;
+                if (Equals(value, _copyGenericAnnotation))
+                    return;
                 _copyGenericAnnotation = value;
                 OnPropertyChanged();
                 UserConfigFile.SetValue(_langItem, nameof(CopyGenericAnnotation), value.ToString(), true);
             }
         }
-
-
-        private bool _copyLegend;
-
-        /// <summary></summary>
+        
+        /// <summary>
+        /// Копировать легенды
+        /// </summary>
         public bool CopyLegend
         {
             get => _copyLegend;
             set
             {
-                if (Equals(value, _copyLegend)) return;
+                if (Equals(value, _copyLegend))
+                    return;
                 _copyLegend = value;
                 OnPropertyChanged();
                 UserConfigFile.SetValue(_langItem, nameof(CopyLegend), value.ToString(), true);
             }
         }
-
 
         #endregion
 
@@ -310,7 +342,10 @@
                         childGroups.Last().SubItems.Add(new BrowserSheet(sheet.Name, sheet.SheetNumber, sheetId, childGroups.Last()));
                     }
                 }
-                else notGroupingSheetIds.Add(sheetId);
+                else
+                {
+                    notGroupingSheetIds.Add(sheetId);
+                }
             }
 
             if (notGroupingSheetIds.Any())
@@ -348,7 +383,8 @@
             var currentDoc = _uiApplication.ActiveUIDocument.Document;
             foreach (Document document in _uiApplication.Application.Documents)
             {
-                if (Equals(document, currentDoc)) continue;
+                if (Equals(document, currentDoc))
+                    continue;
                 Documents.Add(new RevitDocument(document));
             }
         }
@@ -365,7 +401,6 @@
             CopyTextNotes = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(CopyTextNotes)), out b) && b;
             UpdateExistingViewContents = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(UpdateExistingViewContents)), out b) && b;
             CopyGenericAnnotation = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(CopyGenericAnnotation)), out b) && b;
-            
         }
 
         private async void CopySheets(object o)
@@ -387,7 +422,7 @@
                 return;
             }
 
-            ProgressMaximum = selectedSheets.Count * destinationDocuments.Count - 1;
+            ProgressMaximum = (selectedSheets.Count * destinationDocuments.Count) - 1;
             IsWork = true;
 
             var doc = _uiApplication.ActiveUIDocument.Document;
@@ -402,19 +437,17 @@
                     // Каждую итерацию оборачиваем в try{} catch{} чтобы в случае ошибки не прерывалась работа
                     try
                     {
-                        Document dest_doc = destinationDocument.Document;
-                        FilteredElementCollector сollectorViewLegend = new FilteredElementCollector(dest_doc).OfClass(typeof(View));
-                        if (!сollectorViewLegend.Cast<View>().Where(x => x.ViewType == ViewType.Legend).Any())
+                        Document destDoc = destinationDocument.Document;
+                        FilteredElementCollector сollectorViewLegend = new FilteredElementCollector(destDoc).OfClass(typeof(View));
+                        if (сollectorViewLegend.Cast<View>().All(x => x.ViewType != ViewType.Legend))
                         {
                             await _mainWindow.ShowMessageAsync("Необходимо создать легенду", string.Empty).ConfigureAwait(true);
-                            //return;
-
+                            return;
                         }
                         
-                        //сбор контента листов для копирования
+                        // сбор контента листов для копирования
                         var viewContents = new FilteredElementCollector(doc).OwnedByView(sheet.Id);
                         List<ElementId> viewContentsId = new List<ElementId>();
-                        List<ScheduleSheetInstance> scheduleSheetInstances = new List<ScheduleSheetInstance>();
                         if (viewContents.Any())
                         {                            
                             foreach (var itemContent in viewContents)
@@ -425,84 +458,90 @@
                                     {
                                       viewContentsId.Add(itemContent.Id);
                                     }
+
                                     if (CopyGenericAnnotation && itemContent.Category.Id.IntegerValue == -2000150)
                                     {
                                         viewContentsId.Add(itemContent.Id);
                                     }
+
                                     if (CopyTitleBlocks && itemContent.Category.Id.IntegerValue == -2000280)
                                     {
                                         viewContentsId.Add(itemContent.Id);
                                     }
+
                                     if (CopySchedules && itemContent.Category.Id.IntegerValue == -2000570)
                                     {
                                         viewContentsId.Add(itemContent.Id);                                        
                                     }                                   
                                 }
                             }
-
                         }                       
-                        using (Transaction _tr = new Transaction(dest_doc, "Create"))
+
+                        using (Transaction tr = new Transaction(destDoc, "Create"))
                         {
                             await Task.Delay(500).ConfigureAwait(true);
                             ProgressText = $"Copy sheet {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
 
-                            CopyPasteOptions cp_options = new CopyPasteOptions();
-                            cp_options.SetDuplicateTypeNamesHandler(new Helpers.CopyUseDestination());
+                            CopyPasteOptions cpOptions = new CopyPasteOptions();
+                            cpOptions.SetDuplicateTypeNamesHandler(new CopyUseDestination());
 
-                            _tr.Start();
+                            tr.Start();
 
-                            var viewSheets = new FilteredElementCollector(dest_doc).OfClass(typeof(ViewSheet));
-                            var NewNumber = UtilCopy.GetSuffixNumberViewSheet(viewSheets.ToList(), browserSheet.SheetNumber);
+                            var viewSheets = new FilteredElementCollector(destDoc).OfClass(typeof(ViewSheet));
+                            var newNumber = UtilCopy.GetSuffixNumberViewSheet(viewSheets.ToList(), browserSheet.SheetNumber);
 
-                            ViewSheet newViewSheet = ViewSheet.Create(dest_doc, ElementId.InvalidElementId);
+                            ViewSheet newViewSheet = ViewSheet.Create(destDoc, ElementId.InvalidElementId);
                             if (newViewSheet != null)
                             {                    
                                 newViewSheet.get_Parameter(BuiltInParameter.SHEET_NAME).Set(browserSheet.SheetName);
-                                newViewSheet.get_Parameter(BuiltInParameter.SHEET_NUMBER).Set(NewNumber);
+                                newViewSheet.get_Parameter(BuiltInParameter.SHEET_NUMBER).Set(newNumber);
 
                                 if (viewContentsId.Any())
                                 {
-                                    ElementTransformUtils.CopyElements(sheet, viewContentsId, newViewSheet, null, cp_options);
+                                    ElementTransformUtils.CopyElements(sheet, viewContentsId, newViewSheet, null, cpOptions);
                                 }
+
                                 if (CopyLegend)
                                 {
                                     await Task.Delay(500).ConfigureAwait(true);
                                     ProgressText = $"Copy legend {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
-                                    UtilCopy.copy_Legend(doc, sheet, newViewSheet, dest_doc, cp_options);
-
+                                    UtilCopy.CopyLegend(doc, sheet, newViewSheet, destDoc, cpOptions);
                                 }
+
                                 if (CopyGuideGrids)
                                 {
                                     await Task.Delay(500).ConfigureAwait(true);
                                     ProgressText = $"Copy guide grid {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
-                                    UtilCopy.copy_guideGrids(doc, sheet, newViewSheet, dest_doc, cp_options);
+                                    UtilCopy.CopyGuideGrids(doc, sheet, newViewSheet, destDoc, cpOptions);
                                 }
+
                                 if (CopyDraftingView)
                                 {
                                     await Task.Delay(500).ConfigureAwait(true);
                                     ProgressText = $"Copy drafting view   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
-                                    UtilCopy.copy_draftingview(doc, sheet, newViewSheet, dest_doc, cp_options);
+                                    UtilCopy.CopyDraftingView(doc, sheet, newViewSheet, destDoc, cpOptions);
                                 }
 
                                 if (CopyImageView)
                                 {
                                     await Task.Delay(500).ConfigureAwait(true);
                                     ProgressText = $"Copy sheet imageview   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
-                                    UtilCopy.copy_ImageView(doc, sheet, newViewSheet, dest_doc, cp_options);                                    
+                                    UtilCopy.CopyImageView(doc, sheet, newViewSheet, destDoc, cpOptions);                                    
                                 }
+
                                 if (CopySheetRevisions)
                                 {
                                     await Task.Delay(500).ConfigureAwait(true);
                                     ProgressText = $"Copy sheet revisions   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
-                                    UtilCopy.copy_sheetRevisions(doc, sheet, newViewSheet, dest_doc);
+                                    UtilCopy.CopySheetRevisions(doc, sheet, newViewSheet, destDoc);
                                 }
-                               
                             }
-                            _tr.Commit();
+
+                            tr.Commit();
                         }                      
+
                         progressIndex++;
                         ProgressValue = progressIndex;
-                        
                     }
                     catch (Exception exception)
                     {
@@ -518,8 +557,5 @@
 
             IsWork = false;
         }
-
-        
-
     }
 }

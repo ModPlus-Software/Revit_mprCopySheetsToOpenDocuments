@@ -32,6 +32,9 @@
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>$(SolutionDir)\ModPlus.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ModPlusAPI">
       <HintPath>..\..\..\..\..\..\..\ModPlus\Extensions\ModPlusAPI.dll</HintPath>
@@ -64,8 +67,14 @@
     <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\CopyUseDestination.cs">
       <Link>Helpers\CopyUseDestination.cs</Link>
     </Compile>
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\FilterByName.cs">
+      <Link>Helpers\FilterByName.cs</Link>
+    </Compile>
     <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\OrdinalStringComparer.cs">
       <Link>Helpers\OrdinalStringComparer.cs</Link>
+    </Compile>
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\UtilCopy.cs">
+      <Link>Helpers\UtilCopy.cs</Link>
     </Compile>
     <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Models\BrowserSheet.cs">
       <Link>Models\BrowserSheet.cs</Link>
@@ -110,6 +119,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

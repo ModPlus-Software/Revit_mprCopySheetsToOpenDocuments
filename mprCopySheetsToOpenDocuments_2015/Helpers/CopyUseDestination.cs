@@ -2,8 +2,10 @@
 {
     using Autodesk.Revit.DB;
 
-    class CopyUseDestination : IDuplicateTypeNamesHandler
+    /// <inheritdoc />
+    public class CopyUseDestination : IDuplicateTypeNamesHandler
     {
+        /// <inheritdoc />
         public DuplicateTypeAction OnDuplicateTypeNamesFound(DuplicateTypeNamesHandlerArgs args)
         {
             return DuplicateTypeAction.UseDestinationTypes;

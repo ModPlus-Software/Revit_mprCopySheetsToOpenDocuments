@@ -1,12 +1,10 @@
 ﻿namespace mprCopySheetsToOpenDocuments.Helpers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Autodesk.Revit.DB;
 
+    /// <summary>
+    /// Утилиты фильтрации элементов по содержимому параметров
+    /// </summary>
     public class FilterByName
     {
         /// <summary>
@@ -16,14 +14,14 @@
         /// <param name="searchText">Искомый текст в параметре</param>
         /// <param name="doc">Класс документа для поиска</param>
         /// <returns></returns>
-        public static FilteredElementCollector FilterElementByNameEqualsCollector(BuiltInParameter bip, String searchText, Document doc)
+        public static FilteredElementCollector FilterElementByNameEqualsCollector(BuiltInParameter bip, string searchText, Document doc)
         {
-            ElementId nameParamId = new ElementId(bip);
-            ParameterValueProvider pvp = new ParameterValueProvider(nameParamId);
-            FilterStringEquals evaluator = new FilterStringEquals();
-            FilterStringRule rule = new FilterStringRule(pvp, evaluator, searchText, false);
-            ElementParameterFilter paramFilter = new ElementParameterFilter(rule);
-            FilteredElementCollector selectElement = new FilteredElementCollector(doc).WherePasses(paramFilter);
+            var nameParamId = new ElementId(bip);
+            var pvp = new ParameterValueProvider(nameParamId);
+            var evaluator = new FilterStringEquals();
+            var rule = new FilterStringRule(pvp, evaluator, searchText, false);
+            var paramFilter = new ElementParameterFilter(rule);
+            var selectElement = new FilteredElementCollector(doc).WherePasses(paramFilter);
             return selectElement;
         }
 
@@ -34,14 +32,14 @@
         /// <param name="searchText">Искомый текст в параметре</param>
         /// <param name="doc">Класс документа для поиска</param>
         /// <returns></returns>
-        public static FilteredElementCollector FilterElementByNameContainsCollector(BuiltInParameter bip, String searchText, Document doc)
+        public static FilteredElementCollector FilterElementByNameContainsCollector(BuiltInParameter bip, string searchText, Document doc)
         {            
-            ElementId nameParamId = new ElementId(bip);
-            ParameterValueProvider pvp = new ParameterValueProvider(nameParamId);
-            FilterStringContains evaluator = new FilterStringContains();
-            FilterStringRule rule = new FilterStringRule(pvp, evaluator, searchText, false);
-            ElementParameterFilter paramFilter = new ElementParameterFilter(rule);
-            FilteredElementCollector selectElement = new FilteredElementCollector(doc).WherePasses(paramFilter);
+            var nameParamId = new ElementId(bip);
+            var pvp = new ParameterValueProvider(nameParamId);
+            var evaluator = new FilterStringContains();
+            var rule = new FilterStringRule(pvp, evaluator, searchText, false);
+            var paramFilter = new ElementParameterFilter(rule);
+            var selectElement = new FilteredElementCollector(doc).WherePasses(paramFilter);
             return selectElement;
         }
     }
