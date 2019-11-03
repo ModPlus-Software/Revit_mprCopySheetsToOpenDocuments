@@ -8,7 +8,9 @@
     /// </summary>
     public partial class MainWindow
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// Конструктор
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();

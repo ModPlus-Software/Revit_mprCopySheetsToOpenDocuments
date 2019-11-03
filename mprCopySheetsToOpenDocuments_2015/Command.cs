@@ -25,7 +25,8 @@
 
                 if (commandData.Application.Application.Documents.Size < 2)
                 {
-                    MessageBox.Show("You must open at last two documents", MessageBoxIcon.Close);
+                    // Необходимо открыть не менее двух документов
+                    MessageBox.Show(Language.GetItem(ModPlusConnector.Instance.Name, "m1"), MessageBoxIcon.Close);
                     return Result.Cancelled;
                 }
 

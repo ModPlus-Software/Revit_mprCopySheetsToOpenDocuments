@@ -9,7 +9,7 @@
              xmlns:converters="clr-namespace:ModPlusAPI.Converters;assembly=ModPlusAPI"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance viewModels:MainViewModel, d:IsDesignTimeCreatable=False}"
-             MinWidth="600" MinHeight="400"
+             MinWidth="600" MinHeight="500"
              WindowStartupLocation="CenterScreen"
              ResizeMode="CanResizeWithGrip">
     <Window.Resources>
@@ -17,6 +17,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/ModPlusStyle;component/Styles/Controls.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <XmlDataProvider x:Key="Lang" Source="E:/ModPlus/Languages/en-US.xml" XPath="ModPlus/mprCopySheetsToOpenDocuments" />
             <converters:BooleanInverseConverter x:Key="BooleanInverseConverter"/>
 
             <HierarchicalDataTemplate DataType="{x:Type model:BrowserSheetGroup}"
@@ -56,7 +57,7 @@
         </Grid.ColumnDefinitions>
         <!-- sheets -->
         <GroupBox Grid.Row="0" Grid.Column="0"
-                  Header="Sheets">
+                  Header="{Binding Source={StaticResource Lang}, XPath=h1}">
             <TreeView ItemsSource="{Binding Path=SheetGroups}"
                       IsEnabled="{Binding Path=IsWork, Converter={StaticResource BooleanInverseConverter}}"
                       Margin="0" BorderThickness="0">
@@ -76,7 +77,7 @@
             </Grid.RowDefinitions>
             <!-- documents -->
             <GroupBox Grid.Row="0"
-                      Header="Destinations Documents">
+                      Header="{Binding Source={StaticResource Lang}, XPath=h2}">
                 <ListBox ItemsSource="{Binding Path=Documents}"
                          Margin="0" BorderThickness="0">
                     <ListBox.ItemTemplate>
@@ -89,37 +90,37 @@
             </GroupBox>
             <!-- settings -->
             <GroupBox Grid.Row="1"
-                      Header="Settings">
+                      Header="{Binding Source={StaticResource Lang}, XPath=h3}">
                 <StackPanel Orientation="Vertical">
-                    <CheckBox Content="Copy sheet TitleBlocks"
+                    <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co1}"
                               IsChecked="{Binding Path=CopyTitleBlocks, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox Content="Copy Schedules"
+                    <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co2}"
                               IsChecked="{Binding Path=CopySchedules, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox Content="Copy Legend"
+                    <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co3}"
                               IsChecked="{Binding Path=CopyLegend, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox Content="Copy image view"
+                    <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co4}"
                               IsChecked="{Binding Path=CopyImageView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox Content="Copy drafting view"
+                    <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co5}"
                               IsChecked="{Binding Path=CopyDraftingView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>                                        
-                    <CheckBox Content="Copy Text Notes"
+                    <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co6}"
                               IsChecked="{Binding Path=CopyTextNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>                    
-                    <CheckBox Content="Copy Generic Annotations"
+                    <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co7}"
                               IsChecked="{Binding Path=CopyGenericAnnotation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox Content="Copy Guide Grids"
+                    <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co8}"
                               IsChecked="{Binding Path=CopyGuideGrids, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox Content="Copy and Set Sheet Revisions"
+                    <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co9}"
                               IsChecked="{Binding Path=CopySheetRevisions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox Content="Update Existing View Contents"
-                              IsChecked="{Binding Path=UpdateExistingViewContents, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-
-
+                    <!--<CheckBox Content="Update Existing View Contents"
+                              IsChecked="{Binding Path=UpdateExistingViewContents, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>-->
                 </StackPanel>
             </GroupBox>
         </Grid>
         <!-- progress -->
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
                     Orientation="Vertical">
-            <Button Content="GO!" HorizontalAlignment="Center"
+            <!-- start -->
+            <Button Content="{Binding Source={StaticResource Lang}, XPath=h4}" HorizontalAlignment="Center"
+                    IsEnabled="{Binding Path=IsWork, Converter={StaticResource BooleanInverseConverter}}"
                     Command="{Binding Path=CopySheetsCommand}"></Button>
             <TextBlock HorizontalAlignment="Center"
                        Text="{Binding Path=ProgressText}"></TextBlock>

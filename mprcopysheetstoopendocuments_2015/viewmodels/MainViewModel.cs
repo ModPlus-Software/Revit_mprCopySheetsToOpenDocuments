@@ -419,7 +419,8 @@
                 .ToList();
             if (!selectedSheets.Any())
             {
-                await _mainWindow.ShowMessageAsync("Нужно выбрать листы!", string.Empty).ConfigureAwait(true);
+                // Нужно выбрать листы для копирования!
+                await _mainWindow.ShowMessageAsync(GetLangItem("m2"), string.Empty).ConfigureAwait(true);
                 return;
             }
 
@@ -427,7 +428,8 @@
 
             if (!destinationDocuments.Any())
             {
-                await _mainWindow.ShowMessageAsync("Нужно выбрать документы!", string.Empty).ConfigureAwait(true);
+                // Нужно выбрать целевые документы!
+                await _mainWindow.ShowMessageAsync(GetLangItem("m3"), string.Empty).ConfigureAwait(true);
                 return;
             }
 
@@ -437,12 +439,14 @@
             var doc = _uiApplication.ActiveUIDocument.Document;
             var progressIndex = 0;
 
+            var transactionName = Language.GetFunctionLocalName(ModPlusConnector.Instance.Name, ModPlusConnector.Instance.LName);
+
             foreach (var destinationDocument in destinationDocuments)
             {
                 var destDoc = destinationDocument.Document;
                 var ignoreLegends = false;
 
-                using (var transactionGroup = new TransactionGroup(destDoc, "Name of plugin"))
+                using (var transactionGroup = new TransactionGroup(destDoc, transactionName))
                 {
                     transactionGroup.Start();
 
@@ -451,14 +455,16 @@
                         var сollectorViewLegend = new FilteredElementCollector(destDoc).OfClass(typeof(View));
                         if (сollectorViewLegend.Cast<View>().All(x => x.ViewType != ViewType.Legend))
                         {
+                            // Для копирования легенд в целевом документе "{0}" требуется создать хотя бы одну легенду
+                            // Продолжить копирование листов для этого документа?
                             var dialogResult = await _mainWindow.ShowMessageAsync(
-                                $"Для копирования легенд в документе \"{destDoc.Title}\" необходимо создать легенду",
-                                "Продолжить копирование листов?",
+                                string.Format(GetLangItem("m4"), destDoc.Title),
+                                GetLangItem("m5"),
                                 MessageDialogStyle.AffirmativeAndNegative,
                                 new MetroDialogSettings
                                 {
-                                    AffirmativeButtonText = "Да",
-                                    NegativeButtonText = "Нет"
+                                    AffirmativeButtonText = GetLangItem("yes"),
+                                    NegativeButtonText = GetLangItem("no")
                                 }).ConfigureAwait(true);
                             if (dialogResult == MessageDialogResult.Affirmative)
                             {
@@ -513,7 +519,10 @@
                             using (var tr = new Transaction(destDoc, "Create"))
                             {
                                 await Task.Delay(100).ConfigureAwait(true);
-                                ProgressText = $"Copy sheet {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+
+                                // Копирование листа "{0}" в документ "{1}"
+                                ProgressText = string.Format(
+                                    GetLangItem("m6"), $"{browserSheet.SheetNumber} - {browserSheet.SheetName}", destinationDocument.Title);
 
                                 var cpOptions = new CopyPasteOptions();
                                 cpOptions.SetDuplicateTypeNamesHandler(new CopyUseDestination());
@@ -537,35 +546,60 @@
                                     if (CopyLegend && !ignoreLegends)
                                     {
                                         await Task.Delay(100).ConfigureAwait(true);
-                                        ProgressText = $"Copy legend {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+
+                                        // Копирование легенд с листа "{0}" в документ "{1}"
+                                        ProgressText = string.Format(
+                                            GetLangItem("m7"),
+                                            $"{browserSheet.SheetNumber} - {browserSheet.SheetName}",
+                                            destinationDocument.Title);
                                         UtilCopy.CopyLegend(doc, sheet, newViewSheet, destDoc, cpOptions);
                                     }
 
                                     if (CopyGuideGrids)
                                     {
                                         await Task.Delay(100).ConfigureAwait(true);
-                                        ProgressText = $"Copy guide grid {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+                                        
+                                        // Копирование сеток направляющих с листа "{0}" в документ "{1}"
+                                        ProgressText = string.Format(
+                                            GetLangItem("m8"),
+                                            $"{browserSheet.SheetNumber} - {browserSheet.SheetName}",
+                                            destinationDocument.Title);
                                         UtilCopy.CopyGuideGrids(doc, sheet, newViewSheet, destDoc, cpOptions);
                                     }
 
                                     if (CopyDraftingView)
                                     {
                                         await Task.Delay(100).ConfigureAwait(true);
-                                        ProgressText = $"Copy drafting view   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+                                        
+                                        // Копирование чертежных видов с листа "{0}" в документ "{1}"
+                                        ProgressText = string.Format(
+                                            GetLangItem("m9"),
+                                            $"{browserSheet.SheetNumber} - {browserSheet.SheetName}",
+                                            destinationDocument.Title);
                                         UtilCopy.CopyDraftingView(doc, sheet, newViewSheet, destDoc, cpOptions);
                                     }
 
                                     if (CopyImageView)
                                     {
                                         await Task.Delay(100).ConfigureAwait(true);
-                                        ProgressText = $"Copy sheet imageview   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+                                        
+                                        // Копирование изображений с листа "{0}" в документ "{1}"
+                                        ProgressText = string.Format(
+                                            GetLangItem("m10"),
+                                            $"{browserSheet.SheetNumber} - {browserSheet.SheetName}",
+                                            destinationDocument.Title);
                                         UtilCopy.CopyImageView(doc, sheet, newViewSheet, destDoc, cpOptions);
                                     }
 
                                     if (CopySheetRevisions)
                                     {
                                         await Task.Delay(100).ConfigureAwait(true);
-                                        ProgressText = $"Copy sheet revisions   {browserSheet.SheetNumber} - {browserSheet.SheetName} to document {destinationDocument.Title}";
+                                        
+                                        // Копирование изменений с листа "{0}" в документ "{1}"
+                                        ProgressText = string.Format(
+                                            GetLangItem("m11"),
+                                            $"{browserSheet.SheetNumber} - {browserSheet.SheetName}",
+                                            destinationDocument.Title);
                                         UtilCopy.CopySheetRevisions(doc, sheet, newViewSheet, destDoc);
                                     }
                                 }
@@ -595,6 +629,11 @@
             ProgressMaximum = 1;
             ProgressValue = 0;
             ProgressText = string.Empty;
+        }
+
+        private static string GetLangItem(string key)
+        {
+            return Language.GetItem(ModPlusConnector.Instance.Name, key);
         }
     }
 }
