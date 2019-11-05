@@ -620,6 +620,8 @@
                 }
             }
 
+            await _mainWindow.ShowMessageAsync(GetLangItem("m12"), string.Empty);
+
             ClearProgress();
             IsWork = false;
         }
