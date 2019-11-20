@@ -414,9 +414,7 @@
 
         private async void CopySheets(object o)
         {
-            var selectedSheets = SheetGroups
-                .SelectMany(g => g.SubItems.Where(i => i is BrowserSheet sheet && sheet.Checked).Cast<BrowserSheet>())
-                .ToList();
+            var selectedSheets = GetSelectedSheets(SheetGroups).ToList();
             if (!selectedSheets.Any())
             {
                 // Нужно выбрать листы для копирования!
@@ -636,6 +634,29 @@
         private static string GetLangItem(string key)
         {
             return Language.GetItem(ModPlusConnector.Instance.Name, key);
+        }
+
+        private IEnumerable<BrowserSheet> GetSelectedSheets(IEnumerable<BrowserSheetGroup> groups)
+        {
+            return groups.SelectMany(GetSelectedSheets);
+        }
+
+        private IEnumerable<BrowserSheet> GetSelectedSheets(BrowserSheetGroup group)
+        {
+            foreach (var item in group.SubItems)
+            {
+                if (item is BrowserSheet browserSheet && browserSheet.Checked)
+                {
+                    yield return browserSheet;
+                }
+                else if (item is BrowserSheetGroup subGroup)
+                {
+                    foreach (var sheet in GetSelectedSheets(subGroup))
+                    {
+                        yield return sheet;
+                    }
+                }
+            }
         }
     }
 }
