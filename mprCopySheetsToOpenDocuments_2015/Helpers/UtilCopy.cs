@@ -162,7 +162,12 @@
                         var viewportItem = activeDocument.GetElement(viewport.ViewId);
                         if (viewportItem is View viewLegend && viewLegend.ViewType == ViewType.Legend)
                         {
-                            var viewContents = new FilteredElementCollector(activeDocument).OwnedByView(viewLegend.Id).ToElementIds().Where(x => activeDocument.GetElement(x).Category != null && activeDocument.GetElement(x).Category.Id.IntegerValue != -2000055).ToList();
+                            var viewContents = new FilteredElementCollector(activeDocument)
+                                .OwnedByView(viewLegend.Id)
+                                .ToElementIds()
+                                .Where(x => activeDocument.GetElement(x).Category != null && 
+                                            activeDocument.GetElement(x).Category.Id.IntegerValue != -2000055)
+                                .ToList();
                             if (viewContents.Any())
                             {
                                 if (destinationDocument.GetElement(destinationViewLegend.First().Duplicate(ViewDuplicateOption.Duplicate)) is View newViewLegend)

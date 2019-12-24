@@ -4,12 +4,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{ACEB731E-0883-4ECC-A2D4-AFBAA84C1811}</ProjectGuid>
+    <ProjectGuid>{BCD3D086-BD86-4943-9601-53F589DB1C84}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>mprCopySheetsToOpenDocuments</RootNamespace>
-    <AssemblyName>mprCopySheetsToOpenDocuments_2018</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <AssemblyName>mprCopySheetsToOpenDocuments_2016</AssemblyName>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;R2018</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;R2016</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x64</PlatformTarget>
@@ -27,9 +27,10 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;R2018</DefineConstants>
+    <DefineConstants>TRACE;R2016</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup>
     <CodeAnalysisRuleSet>$(SolutionDir)\ModPlus.ruleset</CodeAnalysisRuleSet>
@@ -53,25 +54,25 @@
     <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\FilterByName.cs">
       <Link>Helpers\FilterByName.cs</Link>
     </Compile>
-    <Compile Include="..\mprcopysheetstoopendocuments_2015\helpers\OrdinalStringComparer.cs">
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\OrdinalStringComparer.cs">
       <Link>Helpers\OrdinalStringComparer.cs</Link>
     </Compile>
     <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\UtilCopy.cs">
       <Link>Helpers\UtilCopy.cs</Link>
     </Compile>
-    <Compile Include="..\mprcopysheetstoopendocuments_2015\models\BrowserSheet.cs">
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Models\BrowserSheet.cs">
       <Link>Models\BrowserSheet.cs</Link>
     </Compile>
-    <Compile Include="..\mprcopysheetstoopendocuments_2015\models\BrowserSheetGroup.cs">
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Models\BrowserSheetGroup.cs">
       <Link>Models\BrowserSheetGroup.cs</Link>
     </Compile>
-    <Compile Include="..\mprcopysheetstoopendocuments_2015\models\IBrowserItem.cs">
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Models\IBrowserItem.cs">
       <Link>Models\IBrowserItem.cs</Link>
     </Compile>
-    <Compile Include="..\mprcopysheetstoopendocuments_2015\models\RevitDocument.cs">
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Models\RevitDocument.cs">
       <Link>Models\RevitDocument.cs</Link>
     </Compile>
-    <Compile Include="..\mprcopysheetstoopendocuments_2015\models\SortOrder.cs">
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Models\SortOrder.cs">
       <Link>Models\SortOrder.cs</Link>
     </Compile>
     <Compile Include="..\mprCopySheetsToOpenDocuments_2015\ModPlusConnector.cs">
@@ -80,53 +81,35 @@
     <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Properties\AssemblyInfo.cs">
       <Link>Properties\AssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="..\mprcopysheetstoopendocuments_2015\viewmodels\MainViewModel.cs">
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\ViewModels\MainViewModel.cs">
       <Link>ViewModels\MainViewModel.cs</Link>
     </Compile>
-    <Compile Include="..\mprcopysheetstoopendocuments_2015\views\MainWindow.xaml.cs">
+    <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Views\MainWindow.xaml.cs">
       <Link>Views\MainWindow.xaml.cs</Link>
       <DependentUpon>MainWindow.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="..\mprcopysheetstoopendocuments_2015\resources\mprCopySheetsToOpenDocuments_16x16.png">
+    <Resource Include="..\mprCopySheetsToOpenDocuments_2015\Resources\mprCopySheetsToOpenDocuments_16x16.png">
       <Link>Resources\mprCopySheetsToOpenDocuments_16x16.png</Link>
     </Resource>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="..\mprcopysheetstoopendocuments_2015\resources\mprCopySheetsToOpenDocuments_32x32.png">
+    <Resource Include="..\mprCopySheetsToOpenDocuments_2015\Resources\mprCopySheetsToOpenDocuments_32x32.png">
       <Link>Resources\mprCopySheetsToOpenDocuments_32x32.png</Link>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="..\mprcopysheetstoopendocuments_2015\views\MainWindow.xaml">
+    <Page Include="..\mprCopySheetsToOpenDocuments_2015\Views\MainWindow.xaml">
       <Link>Views\MainWindow.xaml</Link>
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations">
-      <Version>2019.1.3</Version>
-	  <ExcludeAssets>runtime</ExcludeAssets>
-    </PackageReference>
-    <PackageReference Include="ModPlus.Revit.API.2018">
-      <Version>1.0.0</Version>
-	  <ExcludeAssets>runtime</ExcludeAssets>
-    </PackageReference>
-    <PackageReference Include="ModPlusAPI">
-      <Version>1.3.1</Version>
-	  <ExcludeAssets>runtime</ExcludeAssets>
-    </PackageReference>
-    <PackageReference Include="ModPlusStyle">
-      <Version>1.3.0</Version>
-	  <ExcludeAssets>runtime</ExcludeAssets>
-    </PackageReference>
-    <PackageReference Include="StyleCop.Analyzers">
-      <Version>1.1.118</Version>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
+    <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

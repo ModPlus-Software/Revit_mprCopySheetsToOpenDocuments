@@ -68,11 +68,9 @@ namespace mprCopySheetsToOpenDocuments.Helpers
             {
                 if (splitY.Length <= i)
                 {
-                    // ReSharper disable once RedundantAssignment
                     comparer = 1; // x > y
                 }
-
-                if (int.TryParse(splitX[i], out var numericX))
+                else if (int.TryParse(splitX[i], out var numericX))
                 {
                     if (int.TryParse(splitY[i], out var numericY))
                     {

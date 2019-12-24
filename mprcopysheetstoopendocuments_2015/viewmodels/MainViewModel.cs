@@ -441,6 +441,8 @@
 
             foreach (var destinationDocument in destinationDocuments)
             {
+                _mainWindow.Focus();
+                _mainWindow.Activate();
                 var destDoc = destinationDocument.Document;
                 var ignoreLegends = false;
 

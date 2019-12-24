@@ -4,7 +4,7 @@
     using System.Collections.ObjectModel;
     using System.Linq;
     using Helpers;
-    using ModPlusAPI.Annotations;
+    using JetBrains.Annotations;
     using ModPlusAPI.Mvvm;
 
     /// <summary>

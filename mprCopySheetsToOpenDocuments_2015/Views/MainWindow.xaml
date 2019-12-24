@@ -11,7 +11,7 @@
              d:DataContext="{d:DesignInstance viewModels:MainViewModel, d:IsDesignTimeCreatable=False}"
              MinWidth="600" MinHeight="500"
              WindowStartupLocation="CenterScreen"
-             ResizeMode="CanResizeWithGrip" Topmost="True">
+             ResizeMode="CanResizeWithGrip">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
