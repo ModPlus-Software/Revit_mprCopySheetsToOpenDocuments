@@ -54,9 +54,6 @@
     <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\FilterByName.cs">
       <Link>Helpers\FilterByName.cs</Link>
     </Compile>
-    <Compile Include="..\mprcopysheetstoopendocuments_2015\helpers\OrdinalStringComparer.cs">
-      <Link>Helpers\OrdinalStringComparer.cs</Link>
-    </Compile>
     <Compile Include="..\mprCopySheetsToOpenDocuments_2015\Helpers\UtilCopy.cs">
       <Link>Helpers\UtilCopy.cs</Link>
     </Compile>
@@ -109,19 +106,21 @@
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations">
       <Version>2019.1.3</Version>
-	  <ExcludeAssets>runtime</ExcludeAssets>
+      <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
     <PackageReference Include="ModPlus.Revit.API.2019">
       <Version>1.0.0</Version>
-	  <ExcludeAssets>runtime</ExcludeAssets>
+      <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
     <PackageReference Include="ModPlusAPI">
-      <Version>1.3.1</Version>
-	  <ExcludeAssets>runtime</ExcludeAssets>
+      <Version>1.3.4</Version>
+      <ExcludeAssets>runtime</ExcludeAssets>
+      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="ModPlusStyle">
-      <Version>1.3.0</Version>
-	  <ExcludeAssets>runtime</ExcludeAssets>
+      <Version>2.0.0</Version>
+      <ExcludeAssets>runtime</ExcludeAssets>
+      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="StyleCop.Analyzers">
       <Version>1.1.118</Version>

@@ -3,8 +3,8 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
-    using Helpers;
     using JetBrains.Annotations;
+    using ModPlusAPI.IO;
     using ModPlusAPI.Mvvm;
 
     /// <summary>

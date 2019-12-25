@@ -66,7 +66,7 @@
         /// <summary>
         /// Команда копирования
         /// </summary>
-        public ICommand CopySheetsCommand => new RelayCommand(CopySheets);
+        public ICommand CopySheetsCommand => new RelayCommandWithoutParameter(CopySheets);
 
         /// <summary>
         /// Текст прогресса
@@ -412,7 +412,7 @@
             CopyGenericAnnotation = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(CopyGenericAnnotation)), out b) && b;
         }
 
-        private async void CopySheets(object o)
+        private async void CopySheets()
         {
             var selectedSheets = GetSelectedSheets(SheetGroups).ToList();
             if (!selectedSheets.Any())
