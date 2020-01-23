@@ -82,8 +82,9 @@
                          Margin="0" BorderThickness="0">
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="model:RevitDocument">
-                            <CheckBox Content="{Binding Path=Title}"
-                                      IsChecked="{Binding Path=Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                            <CheckBox IsChecked="{Binding Path=Selected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                                <TextBlock Text="{Binding Path=Title, Mode=OneWay}"/>
+                            </CheckBox>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

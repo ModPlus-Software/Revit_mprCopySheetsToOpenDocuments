@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
+    using System.Text;
     using System.Threading.Tasks;
     using System.Windows.Input;
     using Autodesk.Revit.DB;
@@ -48,9 +49,6 @@
         {
             _uiApplication = uiApplication;
             _mainWindow = mainWindow;
-            ReadSheetBrowser();
-            GetDocuments();
-            LoadSettings();
         }
 
         /// <summary>
@@ -292,7 +290,18 @@
 
         #endregion
 
-        private void ReadSheetBrowser()
+        /// <summary>
+        /// Read all work data
+        /// </summary>
+        /// <param name="preSelected">Предварительно выбранные листы</param>
+        public void ReadData(IList<ElementId> preSelected)
+        {
+            ReadSheetBrowser(preSelected);
+            GetDocuments();
+            LoadSettings();
+        }
+
+        private void ReadSheetBrowser(IList<ElementId> preSelected)
         {
             var doc = _uiApplication.ActiveUIDocument.Document;
             var browserOrganization = BrowserOrganization.GetCurrentBrowserOrganizationForSheets(doc);
@@ -319,33 +328,35 @@
                     var existGroup = browserSheetGroups.FirstOrDefault(g => g.GetFullPath() == fullPath);
                     if (existGroup != null)
                     {
-                        existGroup.SubItems.Add(new BrowserSheet(sheet.Name, sheet.SheetNumber, sheetId, existGroup));
+                        existGroup.SubItems.Add(
+                            new BrowserSheet(sheet.Name, sheet.SheetNumber, sheetId, existGroup)
+                            {
+                                Checked = preSelected.Contains(sheetId)
+                            });
                     }
                     else
                     {
                         var topGroup = browserSheetGroups.FirstOrDefault(g => g.ParentGroup == null && folderItems.First().Name == g.Name);
                         if (topGroup == null)
                         {
-                            topGroup = new BrowserSheetGroup(folderItems.First().Name, null)
-                            {
-                                IsExpanded = true
-                            };
+                            topGroup = new BrowserSheetGroup(folderItems.First().Name, null);
                             browserSheetGroups.Add(topGroup);
                         }
 
                         var childGroups = new List<BrowserSheetGroup> { topGroup };
                         for (var i = 1; i < folderItems.Count; i++)
                         {
-                            var childGroup = new BrowserSheetGroup(folderItems[i].Name, childGroups.Last())
-                            {
-                                IsExpanded = true
-                            };
+                            var childGroup = new BrowserSheetGroup(folderItems[i].Name, childGroups.Last());
                             childGroups.Last().SubItems.Add(childGroup);
                             childGroups.Add(childGroup);
                             browserSheetGroups.Add(childGroup);
                         }
 
-                        childGroups.Last().SubItems.Add(new BrowserSheet(sheet.Name, sheet.SheetNumber, sheetId, childGroups.Last()));
+                        childGroups.Last().SubItems.Add(
+                            new BrowserSheet(sheet.Name, sheet.SheetNumber, sheetId, childGroups.Last())
+                            {
+                                Checked = preSelected.Contains(sheetId)
+                            });
                     }
                 }
                 else
@@ -356,14 +367,15 @@
 
             if (notGroupingSheetIds.Any())
             {
-                var browserSheetGroup = new BrowserSheetGroup("???", null)
-                {
-                    IsExpanded = true
-                };
+                var browserSheetGroup = new BrowserSheetGroup("???", null);
                 foreach (var sheetId in notGroupingSheetIds)
                 {
                     var sheet = (ViewSheet)doc.GetElement(sheetId);
-                    browserSheetGroup.SubItems.Add(new BrowserSheet(sheet.Name, sheet.SheetNumber, sheetId, browserSheetGroup));
+                    browserSheetGroup.SubItems.Add(
+                        new BrowserSheet(sheet.Name, sheet.SheetNumber, sheetId, browserSheetGroup)
+                        {
+                            Checked = preSelected.Contains(sheetId)
+                        });
                 }
 
                 browserSheetGroups.Add(browserSheetGroup);
@@ -385,6 +397,13 @@
                 SheetGroups =
                     new ObservableCollection<BrowserSheetGroup>(topGroups.OrderByDescending(g => g.Name));
             }
+
+            foreach (var sheetGroup in SheetGroups)
+            {
+                sheetGroup.IsExpanded = sheetGroup.HasSelectedSheets();
+            }
+
+            OnPropertyChanged(nameof(SheetGroups));
         }
 
         private void GetDocuments()
@@ -433,6 +452,8 @@
 
             ProgressMaximum = (selectedSheets.Count * destinationDocuments.Count) - 1;
             IsWork = true;
+
+            var errors = new Dictionary<string, string>();
 
             var doc = _uiApplication.ActiveUIDocument.Document;
             var progressIndex = 0;
@@ -612,7 +633,8 @@
                         }
                         catch (Exception exception)
                         {
-                            ExceptionBox.Show(exception);
+                            if (!errors.ContainsKey(browserSheet.FullName))
+                                errors.Add(browserSheet.FullName, exception.Message);
                         }
                     }
                     
@@ -624,6 +646,22 @@
 
             ClearProgress();
             IsWork = false;
+
+            if (errors.Any())
+            {
+                var s = Language.GetItem(_langItem, "h7"); //// Sheet
+                var e = Language.GetItem(_langItem, "h8"); //// Error
+                var sb = new StringBuilder();
+                foreach (var error in errors)
+                {
+                    sb.AppendLine($"{s}: {error.Key}");
+                    sb.AppendLine($"{e}: {error.Value}");
+                    sb.AppendLine();
+                }
+
+                var errWindow = new ErrorsWindow { TbErrors = { Text = sb.ToString() } };
+                errWindow.ShowDialog();
+            }
         }
 
         private void ClearProgress()

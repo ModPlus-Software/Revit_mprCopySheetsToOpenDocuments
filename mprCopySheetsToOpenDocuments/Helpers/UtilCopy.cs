@@ -1,8 +1,12 @@
 ﻿namespace mprCopySheetsToOpenDocuments.Helpers
 {
+    using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using Autodesk.Revit.DB;
+    using Autodesk.Revit.UI;
+    using ModPlusAPI.Windows;
 
     /// <summary>
     /// Методы копирования видов
@@ -36,23 +40,28 @@
                         var viewportItem = activeDocument.GetElement(viewport.ViewId);
                         if (viewportItem is ViewDrafting view && view.ViewType == ViewType.DraftingView)
                         {
-                            var newView = ViewDrafting.Create(destinationDocument, destinationDocument.GetDefaultElementTypeId(ElementTypeGroup.ViewTypeDrafting));
+                            var newView = ViewDrafting.Create(destinationDocument, destinationDocument
+                                .GetDefaultElementTypeId(ElementTypeGroup.ViewTypeDrafting));
                             newView.Scale = view.Scale;
                             newView.Name = GetSuffixNameElements(draftingViews.ToList(), view.Name);
                             var viewContentsDrafting = new FilteredElementCollector(activeDocument).OwnedByView(view.Id);
+
                             foreach (var item in viewContentsDrafting)
                             {
                                 if (item.Category != null && item.Category.Id.IntegerValue != -2000055)
+                                {
                                     viewContents.Add(item.Id);
+                                }
                             }
 
                             if (viewContents.Any())
                             {
                                 ElementTransformUtils.CopyElements(view, viewContents, newView, null, cpOptions);
                             }
-
+                            
                             destinationDocument.Regenerate();
-                            var searchText = activeDocument.GetElement(viewport.GetTypeId()).get_Parameter(BuiltInParameter.ALL_MODEL_TYPE_NAME).AsString();
+                            var searchText = activeDocument.GetElement(viewport.GetTypeId())
+                                .get_Parameter(BuiltInParameter.ALL_MODEL_TYPE_NAME).AsString();
                             var newViewPort = Viewport.Create(destinationDocument, sheetNew.Id, newView.Id, viewport.GetBoxCenter());
                             if (CheckElementName(BuiltInParameter.ALL_MODEL_TYPE_NAME, searchText, destinationDocument))
                             {
@@ -78,7 +87,7 @@
                 }
             }
         }
-
+        
         /// <summary>
         /// Копировать виды изображений
         /// </summary>
@@ -165,7 +174,7 @@
                             var viewContents = new FilteredElementCollector(activeDocument)
                                 .OwnedByView(viewLegend.Id)
                                 .ToElementIds()
-                                .Where(x => activeDocument.GetElement(x).Category != null && 
+                                .Where(x => activeDocument.GetElement(x).Category != null &&
                                             activeDocument.GetElement(x).Category.Id.IntegerValue != -2000055)
                                 .ToList();
                             if (viewContents.Any())

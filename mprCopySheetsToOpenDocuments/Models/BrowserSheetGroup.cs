@@ -119,5 +119,26 @@
                 }
             }
         }
+
+        /// <summary>
+        /// Есть ли в группе отмеченные листы
+        /// </summary>
+        public bool HasSelectedSheets()
+        {
+            return HasSelectedSheets(this);
+        }
+
+        private static bool HasSelectedSheets(BrowserSheetGroup sheetGroup)
+        {
+            foreach (var subItem in sheetGroup.SubItems)
+            {
+                if (subItem is BrowserSheet && subItem.Checked)
+                    return true;
+                if (subItem is BrowserSheetGroup subGroup && HasSelectedSheets(subGroup))
+                    return true;
+            }
+
+            return false;
+        }
     }
 }

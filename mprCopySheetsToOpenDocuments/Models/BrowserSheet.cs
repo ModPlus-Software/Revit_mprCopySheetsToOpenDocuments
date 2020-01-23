@@ -24,6 +24,7 @@
             SheetName = sheetName;
             SheetNumber = sheetNumber;
             InitSheetNumber = sheetNumber;
+            FullName = $"{sheetNumber} - {sheetName}";
             Id = id;
             ParentGroup = parentGroup;
         }
@@ -50,6 +51,11 @@
                 OnPropertyChanged();
             }
         }
+
+        /// <summary>
+        /// Полное имя, состоящее из номера и имени листа
+        /// </summary>
+        public string FullName { get; }
 
         /// <summary>
         /// Номер листа при инициализации (номер, который был изначально).
