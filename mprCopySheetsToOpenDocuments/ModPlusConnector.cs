@@ -38,6 +38,9 @@
 #elif R2020
         /// <inheritdoc />
         public string AvailProductExternalVersion => "2020";
+#elif R2021
+        /// <inheritdoc />
+        public string AvailProductExternalVersion => "2021";
 #endif
 
         /// <inheritdoc />
