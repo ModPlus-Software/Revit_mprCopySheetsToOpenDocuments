@@ -94,25 +94,26 @@
                       Header="{Binding Source={StaticResource Lang}, XPath=h3}">
                 <StackPanel Orientation="Vertical">
                     <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co1}"
-                              IsChecked="{Binding Path=CopyTitleBlocks, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                              IsChecked="{Binding Path=CopyTitleBlocks, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co2}"
-                              IsChecked="{Binding Path=CopySchedules, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                              IsChecked="{Binding Path=CopySchedules, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co3}"
-                              IsChecked="{Binding Path=CopyLegend, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                              IsChecked="{Binding Path=CopyLegend, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co4}"
-                              IsChecked="{Binding Path=CopyImageView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                              IsChecked="{Binding Path=CopyImageView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co5}"
-                              IsChecked="{Binding Path=CopyDraftingView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>                                        
+                              IsChecked="{Binding Path=CopyDraftingView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>                                        
                     <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co6}"
-                              IsChecked="{Binding Path=CopyTextNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>                    
+                              IsChecked="{Binding Path=CopyTextNotes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>                    
                     <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co7}"
-                              IsChecked="{Binding Path=CopyGenericAnnotation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                              IsChecked="{Binding Path=CopyGenericAnnotation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co8}"
-                              IsChecked="{Binding Path=CopyGuideGrids, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                              IsChecked="{Binding Path=CopyGuideGrids, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co9}"
-                              IsChecked="{Binding Path=CopySheetRevisions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <!--<CheckBox Content="Update Existing View Contents"
-                              IsChecked="{Binding Path=UpdateExistingViewContents, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"></CheckBox>-->
+                              IsChecked="{Binding Path=CopySheetRevisions, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <CheckBox Content="{Binding Source={StaticResource Lang}, XPath=co10}"
+                              Visibility="{Binding Path=CopyRasterImagesVisibility}"
+                              IsChecked="{Binding Path=CopyRasterImages, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                 </StackPanel>
             </GroupBox>
         </Grid>

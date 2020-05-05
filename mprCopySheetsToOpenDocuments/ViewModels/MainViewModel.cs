@@ -39,6 +39,7 @@
         private bool _updateExistingViewContents;
         private bool _copyGenericAnnotation;
         private bool _copyLegend;
+        private bool _copyRasterImages;
 
         /// <summary>
         /// Main constructor
@@ -288,6 +289,37 @@
             }
         }
 
+        /// <summary>
+        /// Копировать растровые изображения (+ PDF)
+        /// </summary>
+        public bool CopyRasterImages
+        {
+            get => _copyRasterImages;
+            set
+            {
+                if (_copyRasterImages == value)
+                    return;
+                _copyRasterImages = value;
+                OnPropertyChanged();
+                UserConfigFile.SetValue(_langItem, nameof(CopyRasterImages), value.ToString(), true);
+            }
+        }
+
+        /// <summary>
+        /// Видимость галочки "Копировать растровые изображения (+ PDF)"
+        /// </summary>
+        public System.Windows.Visibility CopyRasterImagesVisibility
+        {
+            get
+            {
+#if !R2015 && !R2016 && !R2017 && !R2018 && !R2019
+                return System.Windows.Visibility.Visible;
+#else
+                return System.Windows.Visibility.Collapsed;
+#endif
+            }
+        }
+
         #endregion
 
         /// <summary>
@@ -429,6 +461,7 @@
             CopyTextNotes = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(CopyTextNotes)), out b) && b;
             UpdateExistingViewContents = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(UpdateExistingViewContents)), out b) && b;
             CopyGenericAnnotation = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(CopyGenericAnnotation)), out b) && b;
+            CopyRasterImages = bool.TryParse(UserConfigFile.GetValue(_langItem, nameof(CopyRasterImages)), out b) && b;
         }
 
         private async void CopySheets()
@@ -514,25 +547,37 @@
                                 {
                                     if (itemContent.Category != null)
                                     {
-                                        if (CopyTextNotes && itemContent.Category.Id.IntegerValue == -2000300)
+                                        if (CopyTextNotes &&
+                                            itemContent.Category.IsBuiltInCategory(BuiltInCategory.OST_TextNotes))
                                         {
                                             viewContentsId.Add(itemContent.Id);
                                         }
 
-                                        if (CopyGenericAnnotation && itemContent.Category.Id.IntegerValue == -2000150)
+                                        if (CopyGenericAnnotation &&
+                                            itemContent.Category.IsBuiltInCategory(BuiltInCategory.OST_GenericAnnotation))
                                         {
                                             viewContentsId.Add(itemContent.Id);
                                         }
 
-                                        if (CopyTitleBlocks && itemContent.Category.Id.IntegerValue == -2000280)
+                                        if (CopyTitleBlocks &&
+                                            itemContent.Category.IsBuiltInCategory(BuiltInCategory.OST_TitleBlocks))
                                         {
                                             viewContentsId.Add(itemContent.Id);
                                         }
 
-                                        if (CopySchedules && itemContent.Category.Id.IntegerValue == -2000570)
+                                        if (CopySchedules &&
+                                            itemContent.Category.IsBuiltInCategory(BuiltInCategory.OST_ScheduleGraphics))
                                         {
                                             viewContentsId.Add(itemContent.Id);
                                         }
+
+#if !R2015 && !R2016 && !R2017 && !R2018 && !R2019
+                                        if (CopyRasterImages && 
+                                            itemContent.Category.IsBuiltInCategory(BuiltInCategory.OST_RasterImages))
+                                        {
+                                            viewContentsId.Add(itemContent.Id);
+                                        }
+#endif
                                     }
                                 }
                             }
@@ -551,7 +596,7 @@
                                 tr.Start();
 
                                 var viewSheets = new FilteredElementCollector(destDoc).OfClass(typeof(ViewSheet));
-                                var newNumber = UtilCopy.GetSuffixNumberViewSheet(viewSheets.ToList(), browserSheet.SheetNumber);
+                                var newNumber = UtilCopy.GetSuffixNumberViewSheet(viewSheets, browserSheet.SheetNumber);
 
                                 var newViewSheet = ViewSheet.Create(destDoc, ElementId.InvalidElementId);
                                 if (newViewSheet != null)
@@ -573,13 +618,13 @@
                                             GetLangItem("m7"),
                                             $"{browserSheet.SheetNumber} - {browserSheet.SheetName}",
                                             destinationDocument.Title);
-                                        UtilCopy.CopyLegend(doc, sheet, newViewSheet, destDoc, cpOptions);
+                                        await UtilCopy.CopyLegend(_mainWindow, doc, sheet, newViewSheet, destDoc, cpOptions);
                                     }
 
                                     if (CopyGuideGrids)
                                     {
                                         await Task.Delay(100).ConfigureAwait(true);
-                                        
+
                                         // Копирование сеток направляющих с листа "{0}" в документ "{1}"
                                         ProgressText = string.Format(
                                             GetLangItem("m8"),
@@ -591,19 +636,19 @@
                                     if (CopyDraftingView)
                                     {
                                         await Task.Delay(100).ConfigureAwait(true);
-                                        
+
                                         // Копирование чертежных видов с листа "{0}" в документ "{1}"
                                         ProgressText = string.Format(
                                             GetLangItem("m9"),
                                             $"{browserSheet.SheetNumber} - {browserSheet.SheetName}",
                                             destinationDocument.Title);
-                                        UtilCopy.CopyDraftingView(doc, sheet, newViewSheet, destDoc, cpOptions);
+                                        await UtilCopy.CopyDraftingView(_mainWindow, doc, sheet, newViewSheet, destDoc, cpOptions);
                                     }
 
                                     if (CopyImageView)
                                     {
                                         await Task.Delay(100).ConfigureAwait(true);
-                                        
+
                                         // Копирование изображений с листа "{0}" в документ "{1}"
                                         ProgressText = string.Format(
                                             GetLangItem("m10"),
@@ -615,7 +660,7 @@
                                     if (CopySheetRevisions)
                                     {
                                         await Task.Delay(100).ConfigureAwait(true);
-                                        
+
                                         // Копирование изменений с листа "{0}" в документ "{1}"
                                         ProgressText = string.Format(
                                             GetLangItem("m11"),
@@ -637,7 +682,7 @@
                                 errors.Add(browserSheet.FullName, exception.Message);
                         }
                     }
-                    
+
                     transactionGroup.Assimilate();
                 }
             }

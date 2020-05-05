@@ -133,7 +133,11 @@
             foreach (var subItem in sheetGroup.SubItems)
             {
                 if (subItem is BrowserSheet && subItem.Checked)
+                {
+                    sheetGroup.IsExpanded = true;
                     return true;
+                }
+
                 if (subItem is BrowserSheetGroup subGroup && HasSelectedSheets(subGroup))
                     return true;
             }
