@@ -338,7 +338,7 @@
             var doc = _uiApplication.ActiveUIDocument.Document;
             var browserOrganization = BrowserOrganization.GetCurrentBrowserOrganizationForSheets(doc);
             var sortingOrder = browserOrganization.SortingOrder;
-            var browserSheetGroups = new List<BrowserSheetGroup>();
+            var groupsByLevel = new Dictionary<int, List<BrowserSheetGroup>>();
 
             var sheetIds = new FilteredElementCollector(doc)
                 .OfClass(typeof(ViewSheet))
@@ -356,39 +356,37 @@
                 var folderItems = browserOrganization.GetFolderItems(sheetId);
                 if (folderItems.Any())
                 {
-                    var fullPath = string.Join("*", folderItems.Select(fi => fi.Name));
-                    var existGroup = browserSheetGroups.FirstOrDefault(g => g.GetFullPath() == fullPath);
-                    if (existGroup != null)
+                    BrowserSheetGroup parentGroup = null;
+                    for (var i = 0; i < folderItems.Count; i++)
                     {
-                        existGroup.SubItems.Add(
-                            new BrowserSheet(sheet.Name, sheet.SheetNumber, sheetId, existGroup)
-                            {
-                                Checked = preSelected.Contains(sheetId)
-                            });
-                    }
-                    else
-                    {
-                        var topGroup = browserSheetGroups.FirstOrDefault(g => g.ParentGroup == null && folderItems.First().Name == g.Name);
-                        if (topGroup == null)
+                        var folderItem = folderItems[i];
+                        BrowserSheetGroup sheetGroup = null;
+                        if (groupsByLevel.ContainsKey(i))
+                            sheetGroup = groupsByLevel[i].FirstOrDefault(g => g.Name == folderItem.Name && g.ParentGroup == parentGroup);
+                        
+                        if (sheetGroup == null)
                         {
-                            topGroup = new BrowserSheetGroup(folderItems.First().Name, null);
-                            browserSheetGroups.Add(topGroup);
+                            sheetGroup = new BrowserSheetGroup(folderItem.Name, parentGroup, i);
+                            if (groupsByLevel.ContainsKey(i))
+                                groupsByLevel[i].Add(sheetGroup);
+                            else
+                                groupsByLevel.Add(i, new List<BrowserSheetGroup> { sheetGroup });
+                            parentGroup?.SubItems.Add(sheetGroup);
                         }
 
-                        var childGroups = new List<BrowserSheetGroup> { topGroup };
-                        for (var i = 1; i < folderItems.Count; i++)
+                        parentGroup = sheetGroup;
+
+                        if (i != folderItems.Count - 1) 
+                            continue;
+
+                        var browserSheet = new BrowserSheet(sheet.Name, sheet.SheetNumber, sheetId, parentGroup);
+                        if (preSelected.Contains(sheetId))
                         {
-                            var childGroup = new BrowserSheetGroup(folderItems[i].Name, childGroups.Last());
-                            childGroups.Last().SubItems.Add(childGroup);
-                            childGroups.Add(childGroup);
-                            browserSheetGroups.Add(childGroup);
+                            browserSheet.Checked = true;
+                            browserSheet.ExpandParents();
                         }
 
-                        childGroups.Last().SubItems.Add(
-                            new BrowserSheet(sheet.Name, sheet.SheetNumber, sheetId, childGroups.Last())
-                            {
-                                Checked = preSelected.Contains(sheetId)
-                            });
+                        parentGroup.SubItems.Add(browserSheet);
                     }
                 }
                 else
@@ -399,7 +397,14 @@
 
             if (notGroupingSheetIds.Any())
             {
-                var browserSheetGroup = new BrowserSheetGroup("???", null);
+                if (!groupsByLevel.ContainsKey(0))
+                    groupsByLevel.Add(0, new List<BrowserSheetGroup>());
+
+                var name = Language.GetItem(_langItem, "notOrganized");
+                if (string.IsNullOrEmpty(name))
+                    name = "!Not organized";
+
+                var browserSheetGroup = new BrowserSheetGroup(name, null, 0);
                 foreach (var sheetId in notGroupingSheetIds)
                 {
                     var sheet = (ViewSheet)doc.GetElement(sheetId);
@@ -410,29 +415,28 @@
                         });
                 }
 
-                browserSheetGroups.Add(browserSheetGroup);
+                groupsByLevel[0].Add(browserSheetGroup);
             }
 
             // Sort
-            var topGroups = browserSheetGroups.Where(g => g.ParentGroup == null).ToList();
-            if (sortingOrder == SortingOrder.Ascending)
+            if (groupsByLevel.Any())
             {
-                foreach (var sheetGroup in browserSheetGroups)
-                    sheetGroup.SortSheets(SortOrder.Ascending);
-                SheetGroups =
-                    new ObservableCollection<BrowserSheetGroup>(topGroups.OrderBy(g => g.Name));
-            }
-            else
-            {
-                foreach (var sheetGroup in browserSheetGroups)
-                    sheetGroup.SortSheets(SortOrder.Descending);
-                SheetGroups =
-                    new ObservableCollection<BrowserSheetGroup>(topGroups.OrderByDescending(g => g.Name));
-            }
+                if (sortingOrder == SortingOrder.Ascending)
+                {
+                    var topGroups = groupsByLevel[0].OrderBy(g => g.Name).ToList();
+                    foreach (var sheetGroup in topGroups) 
+                        sheetGroup.SortSheets(SortOrder.Ascending);
 
-            foreach (var sheetGroup in SheetGroups)
-            {
-                sheetGroup.IsExpanded = sheetGroup.HasSelectedSheets();
+                    SheetGroups = new ObservableCollection<BrowserSheetGroup>(topGroups);
+                }
+                else
+                {
+                    var topGroups = groupsByLevel[0].OrderByDescending(g => g.Name).ToList();
+                    foreach (var sheetGroup in topGroups) 
+                        sheetGroup.SortSheets(SortOrder.Descending);
+
+                    SheetGroups = new ObservableCollection<BrowserSheetGroup>(topGroups);
+                }
             }
 
             OnPropertyChanged(nameof(SheetGroups));

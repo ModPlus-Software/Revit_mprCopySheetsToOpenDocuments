@@ -80,5 +80,18 @@
                 OnPropertyChanged();
             }
         }
+
+        /// <summary>
+        /// Развернуть предков
+        /// </summary>
+        public void ExpandParents()
+        {
+            var parent = ParentGroup;
+            while (parent != null)
+            {
+                parent.IsExpanded = true;
+                parent = parent.ParentGroup;
+            }
+        }
     }
 }

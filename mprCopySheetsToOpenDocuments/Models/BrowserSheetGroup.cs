@@ -1,6 +1,5 @@
 ﻿namespace mprCopySheetsToOpenDocuments.Models
 {
-    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
     using JetBrains.Annotations;
@@ -12,7 +11,6 @@
     /// </summary>
     public class BrowserSheetGroup : VmBase, IBrowserItem
     {
-        private string _fullPath;
         private bool _checked;
         private bool _isExpanded;
 
@@ -21,10 +19,12 @@
         /// </summary>
         /// <param name="name">Имя группы</param>
         /// <param name="parentGroup">Родительская группа</param>
-        public BrowserSheetGroup(string name, [CanBeNull] BrowserSheetGroup parentGroup)
+        /// <param name="level">Уровень группы в дереве</param>
+        public BrowserSheetGroup(string name, [CanBeNull] BrowserSheetGroup parentGroup, int level)
         {
             Name = name;
             ParentGroup = parentGroup;
+            Level = level;
             SubItems = new ObservableCollection<IBrowserItem>();
         }
 
@@ -38,6 +38,11 @@
         /// </summary>
         [CanBeNull]
         public BrowserSheetGroup ParentGroup { get; }
+
+        /// <summary>
+        /// Уровень группы в дереве
+        /// </summary>
+        public int Level { get; }
 
         /// <summary>
         /// Листы в группе
@@ -72,29 +77,6 @@
         }
 
         /// <summary>
-        /// Возвращает строковое представление пути группы
-        /// </summary>
-        /// <returns></returns>
-        public string GetFullPath()
-        {
-            if (_fullPath == null)
-            {
-                var groupNames = new List<string> { Name };
-                var parentGroup = ParentGroup;
-                while (parentGroup != null)
-                {
-                    groupNames.Add(parentGroup.Name);
-                    parentGroup = parentGroup.ParentGroup;
-                }
-
-                groupNames.Reverse();
-                _fullPath = string.Join("*", groupNames);
-            }
-
-            return _fullPath;
-        }
-
-        /// <summary>
         /// Сортировать листы в группе
         /// </summary>
         /// <param name="sortOrder">Порядок сортировки</param>
@@ -118,31 +100,6 @@
                         : new ObservableCollection<IBrowserItem>(groups.OrderByDescending(g => g.Name, new OrdinalStringComparer()));
                 }
             }
-        }
-
-        /// <summary>
-        /// Есть ли в группе отмеченные листы
-        /// </summary>
-        public bool HasSelectedSheets()
-        {
-            return HasSelectedSheets(this);
-        }
-
-        private static bool HasSelectedSheets(BrowserSheetGroup sheetGroup)
-        {
-            foreach (var subItem in sheetGroup.SubItems)
-            {
-                if (subItem is BrowserSheet && subItem.Checked)
-                {
-                    sheetGroup.IsExpanded = true;
-                    return true;
-                }
-
-                if (subItem is BrowserSheetGroup subGroup && HasSelectedSheets(subGroup))
-                    return true;
-            }
-
-            return false;
         }
     }
 }
