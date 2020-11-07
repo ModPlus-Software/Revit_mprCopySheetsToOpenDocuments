@@ -13,7 +13,6 @@
     using Models;
     using ModPlusAPI;
     using ModPlusAPI.Mvvm;
-    using ModPlusAPI.Windows;
     using ModPlusStyle.Controls.Dialogs;
     using Views;
 
@@ -575,7 +574,7 @@
                                             viewContentsId.Add(itemContent.Id);
                                         }
 
-#if !R2015 && !R2016 && !R2017 && !R2018 && !R2019
+#if !R2017 && !R2018 && !R2019
                                         if (CopyRasterImages && 
                                             itemContent.Category.IsBuiltInCategory(BuiltInCategory.OST_RasterImages))
                                         {

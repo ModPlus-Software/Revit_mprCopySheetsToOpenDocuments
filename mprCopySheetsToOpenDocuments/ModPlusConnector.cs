@@ -2,10 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
-    using ModPlusAPI.Interfaces;
+    using ModPlusAPI.Abstractions;
+    using ModPlusAPI.Enums;
 
     /// <inheritdoc />
-    public class ModPlusConnector : IModPlusFunctionInterface
+    public class ModPlusConnector : IModPlusPlugin
     {
         private static ModPlusConnector _instance;
 
@@ -20,13 +21,7 @@
         /// <inheritdoc />
         public string Name => "mprCopySheetsToOpenDocuments";
 
-#if R2015
-        /// <inheritdoc />
-        public string AvailProductExternalVersion => "2015";
-#elif R2016
-        /// <inheritdoc />
-        public string AvailProductExternalVersion => "2016";
-#elif R2017
+#if R2017
         /// <inheritdoc />
         public string AvailProductExternalVersion => "2017";
 #elif R2018
@@ -73,12 +68,12 @@
         /// <inheritdoc />
         public string ToolTipHelpImage => string.Empty;
 
-        /// <inheritdoc />
-        public List<string> SubFunctionsNames => new List<string>();
+        /// <inheritdoc/>
+        public List<string> SubPluginsNames => new List<string>();
 
-        /// <inheritdoc />
-        public List<string> SubFunctionsLames => new List<string>();
-
+        /// <inheritdoc/>
+        public List<string> SubPluginsLNames => new List<string>();
+        
         /// <inheritdoc />
         public List<string> SubDescriptions => new List<string>();
 

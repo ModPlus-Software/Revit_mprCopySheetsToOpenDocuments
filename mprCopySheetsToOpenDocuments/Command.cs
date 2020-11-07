@@ -23,7 +23,9 @@
         {
             try
             {
+#if !DEBUG
                 Statistic.SendCommandStarting(ModPlusConnector.Instance);
+#endif
 
                 if (commandData.Application.Application.Documents.Size < 2)
                 {
