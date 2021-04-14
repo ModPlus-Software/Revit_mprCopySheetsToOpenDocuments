@@ -19,7 +19,11 @@
             var nameParamId = new ElementId(bip);
             var pvp = new ParameterValueProvider(nameParamId);
             var evaluator = new FilterStringEquals();
+#if R2017 || R2018 || R2019 || R2020 || R2021
             var rule = new FilterStringRule(pvp, evaluator, searchText, false);
+#else
+            var rule = new FilterStringRule(pvp, evaluator, searchText);
+#endif
             var paramFilter = new ElementParameterFilter(rule);
             var selectElement = new FilteredElementCollector(doc).WherePasses(paramFilter);
             return selectElement;
@@ -33,11 +37,15 @@
         /// <param name="doc">Класс документа для поиска</param>
         /// <returns></returns>
         public static FilteredElementCollector FilterElementByNameContainsCollector(BuiltInParameter bip, string searchText, Document doc)
-        {            
+        {
             var nameParamId = new ElementId(bip);
             var pvp = new ParameterValueProvider(nameParamId);
             var evaluator = new FilterStringContains();
+#if R2017 || R2018 || R2019 || R2020 || R2021
             var rule = new FilterStringRule(pvp, evaluator, searchText, false);
+#else
+            var rule = new FilterStringRule(pvp, evaluator, searchText);
+#endif
             var paramFilter = new ElementParameterFilter(rule);
             var selectElement = new FilteredElementCollector(doc).WherePasses(paramFilter);
             return selectElement;

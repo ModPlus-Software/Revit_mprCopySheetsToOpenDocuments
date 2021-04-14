@@ -1,5 +1,6 @@
 ﻿namespace mprCopySheetsToOpenDocuments.Helpers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -196,13 +197,16 @@
         /// <param name="sheetNew">Новый лист</param>
         /// <param name="destinationDocument">Документ назначения</param>
         /// <param name="cpOptions">Опции копирования</param>
-        public static async Task CopyLegend(
+        /// <param name="copyRulesForAll">Пара булевых значений с условиями
+        /// "Использовать существующую (для всех случаев)" и "Создать копию (для всех случаев)"</param>
+        public static async Task<Tuple<bool, bool>> CopyLegend(
             MainWindow mainWindow,
             Document activeDocument,
             ViewSheet sheet,
             ViewSheet sheetNew,
             Document destinationDocument,
-            CopyPasteOptions cpOptions)
+            CopyPasteOptions cpOptions,
+            Tuple<bool, bool> copyRulesForAll)
         {
             var viewPortsId = sheet.GetAllViewports();
 
@@ -228,21 +232,52 @@
 
                             if (existDestinationLegend != null)
                             {
-                                // В целевом документе "{0}" имеется легенда "{1}"
-                                var dialogResult = await mainWindow.ShowMessageAsync(
-                                    string.Format(Language.GetItem(ModPlusConnector.Instance.Name, "m13"), destinationDocument.Title, existDestinationLegend.Name),
-                                    Language.GetItem(ModPlusConnector.Instance.Name, "m14"),
-                                    MessageDialogStyle.AffirmativeAndNegative,
-                                    new MetroDialogSettings
-                                    {
-                                        AffirmativeButtonText = Language.GetItem(ModPlusConnector.Instance.Name, "exist"),
-                                        NegativeButtonText = Language.GetItem(ModPlusConnector.Instance.Name, "copy")
-                                    }).ConfigureAwait(true);
-                                if (dialogResult == MessageDialogResult.Affirmative)
+                                if (copyRulesForAll.Item1)
                                 {
                                     copyLegend = false;
                                     newViewPort = Viewport.Create(
                                         destinationDocument, sheetNew.Id, existDestinationLegend.Id, viewport.GetBoxCenter());
+                                }
+                                else if (!copyRulesForAll.Item2)
+                                {
+                                    // В целевом документе "{0}" имеется легенда "{1}"
+                                    var dialogResult = await mainWindow.ShowMessageAsync(
+                                        string.Format(
+                                            Language.GetItem(ModPlusConnector.Instance.Name, "m13"),
+                                            destinationDocument.Title, existDestinationLegend.Name),
+                                        Language.GetItem(ModPlusConnector.Instance.Name, "m14"),
+                                        MessageDialogStyle.AffirmativeAndNegativeAndDoubleAuxiliary,
+                                        new MetroDialogSettings
+                                        {
+                                            AffirmativeButtonText =
+                                                Language.GetItem(ModPlusConnector.Instance.Name, "exist"),
+                                            NegativeButtonText =
+                                                Language.GetItem(ModPlusConnector.Instance.Name, "copy"),
+                                            FirstAuxiliaryButtonText =
+                                                Language.GetItem(ModPlusConnector.Instance.Name, "existAll"),
+                                            SecondAuxiliaryButtonText =
+                                                Language.GetItem(ModPlusConnector.Instance.Name, "copyAll"),
+                                        }).ConfigureAwait(true);
+
+                                    if (dialogResult == MessageDialogResult.Affirmative)
+                                    {
+                                        copyLegend = false;
+                                        newViewPort = Viewport.Create(
+                                            destinationDocument, sheetNew.Id, existDestinationLegend.Id,
+                                            viewport.GetBoxCenter());
+                                    }
+                                    else if (dialogResult == MessageDialogResult.FirstAuxiliary)
+                                    {
+                                        copyLegend = false;
+                                        newViewPort = Viewport.Create(
+                                            destinationDocument, sheetNew.Id, existDestinationLegend.Id,
+                                            viewport.GetBoxCenter());
+                                        copyRulesForAll = new Tuple<bool, bool>(true, false);
+                                    }
+                                    else if (dialogResult == MessageDialogResult.SecondAuxiliary)
+                                    {
+                                        copyRulesForAll = new Tuple<bool, bool>(false, true);
+                                    }
                                 }
                             }
 
@@ -301,6 +336,8 @@
                     }
                 }
             }
+
+            return copyRulesForAll;
         }
 
         /// <summary>

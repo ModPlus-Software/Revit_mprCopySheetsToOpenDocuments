@@ -311,7 +311,7 @@
         {
             get
             {
-#if !R2015 && !R2016 && !R2017 && !R2018 && !R2019
+#if !R2017 && !R2018 && !R2019
                 return System.Windows.Visibility.Visible;
 #else
                 return System.Windows.Visibility.Collapsed;
@@ -362,7 +362,7 @@
                         BrowserSheetGroup sheetGroup = null;
                         if (groupsByLevel.ContainsKey(i))
                             sheetGroup = groupsByLevel[i].FirstOrDefault(g => g.Name == folderItem.Name && g.ParentGroup == parentGroup);
-                        
+
                         if (sheetGroup == null)
                         {
                             sheetGroup = new BrowserSheetGroup(folderItem.Name, parentGroup, i);
@@ -375,7 +375,7 @@
 
                         parentGroup = sheetGroup;
 
-                        if (i != folderItems.Count - 1) 
+                        if (i != folderItems.Count - 1)
                             continue;
 
                         var browserSheet = new BrowserSheet(sheet.Name, sheet.SheetNumber, sheetId, parentGroup);
@@ -423,7 +423,7 @@
                 if (sortingOrder == SortingOrder.Ascending)
                 {
                     var topGroups = groupsByLevel[0].OrderBy(g => g.Name).ToList();
-                    foreach (var sheetGroup in topGroups) 
+                    foreach (var sheetGroup in topGroups)
                         sheetGroup.SortSheets(SortOrder.Ascending);
 
                     SheetGroups = new ObservableCollection<BrowserSheetGroup>(topGroups);
@@ -431,7 +431,7 @@
                 else
                 {
                     var topGroups = groupsByLevel[0].OrderByDescending(g => g.Name).ToList();
-                    foreach (var sheetGroup in topGroups) 
+                    foreach (var sheetGroup in topGroups)
                         sheetGroup.SortSheets(SortOrder.Descending);
 
                     SheetGroups = new ObservableCollection<BrowserSheetGroup>(topGroups);
@@ -534,6 +534,9 @@
                         }
                     }
 
+                    // Правила для копирования легенд в случае, если выбран вариант "применить ко всем случаям"
+                    var copyLegendRules = new Tuple<bool, bool>(false, false);
+
                     foreach (var browserSheet in selectedSheets)
                     {
                         var sheet = doc.GetElement(browserSheet.Id) as ViewSheet;
@@ -575,7 +578,7 @@
                                         }
 
 #if !R2017 && !R2018 && !R2019
-                                        if (CopyRasterImages && 
+                                        if (CopyRasterImages &&
                                             itemContent.Category.IsBuiltInCategory(BuiltInCategory.OST_RasterImages))
                                         {
                                             viewContentsId.Add(itemContent.Id);
@@ -621,7 +624,8 @@
                                             GetLangItem("m7"),
                                             $"{browserSheet.SheetNumber} - {browserSheet.SheetName}",
                                             destinationDocument.Title);
-                                        await UtilCopy.CopyLegend(_mainWindow, doc, sheet, newViewSheet, destDoc, cpOptions);
+                                        copyLegendRules = await UtilCopy.CopyLegend(
+                                            _mainWindow, doc, sheet, newViewSheet, destDoc, cpOptions, copyLegendRules);
                                     }
 
                                     if (CopyGuideGrids)
