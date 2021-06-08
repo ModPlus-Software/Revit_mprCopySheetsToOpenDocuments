@@ -292,8 +292,7 @@
                                     .ToList();
                                 if (viewContents.Any())
                                 {
-                                    if (destinationDocument.GetElement(destinationViewLegends.First()
-                                        .Duplicate(ViewDuplicateOption.Duplicate)) is View newViewLegend)
+                                    if (GetValidLegend(destinationViewLegends) is View newViewLegend)
                                     {
                                         newViewLegend.Name = GetSuffixNameElements(destinationViewLegends, viewLegend.Name);
                                         newViewLegend.Scale = viewLegend.Scale;
@@ -478,6 +477,35 @@
             }
 
             return newName;
+        }
+        
+        private static View GetValidLegend(IEnumerable<View> legends)
+        {
+            Exception cachedLastException = null;
+            foreach (var legend in legends)
+            {
+                try
+                {
+                    using (var tr = new SubTransaction(legend.Document))
+                    {
+                        tr.Start();
+                        legend.Document.GetElement(legend.Duplicate(ViewDuplicateOption.Duplicate));
+                        tr.RollBack();
+                    }
+
+                    return legend;
+                }
+                catch (Exception exception)
+                {
+                    cachedLastException = exception;
+                    
+                    // go to next
+                }
+            }
+
+            if (cachedLastException != null)
+                throw cachedLastException;
+            return null;
         }
     }
 }
