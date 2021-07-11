@@ -19,7 +19,7 @@
     /// <summary>
     /// Модель представления главного окна плагина
     /// </summary>
-    public class MainViewModel : VmBase
+    public class MainViewModel : ObservableObject
     {
         private readonly string _langItem = ModPlusConnector.Instance.Name;
         private readonly MainWindow _mainWindow;

@@ -49,7 +49,7 @@
                             var existDestinationDraftingView =
                                 destinationDraftingViews.FirstOrDefault(l => l.Name == view.Name);
 
-                            if (existDestinationDraftingView != null && 
+                            if (existDestinationDraftingView != null &&
                                 new FilteredElementCollector(destinationDocument)
                                     .OfClass(typeof(Viewport))
                                     .Cast<Viewport>().All(vp => vp.ViewId != existDestinationDraftingView.Id))
@@ -193,8 +193,8 @@
         /// </summary>
         /// <param name="mainWindow">Ссылка на окно главное окно</param>
         /// <param name="activeDocument">Активный документ</param>
-        /// <param name="sheet">Лист</param>
-        /// <param name="sheetNew">Новый лист</param>
+        /// <param name="sourceSheet">Исходный лист активного документа</param>
+        /// <param name="destinationSheet">Целевой лист (копия исходного) целевого документа</param>
         /// <param name="destinationDocument">Документ назначения</param>
         /// <param name="cpOptions">Опции копирования</param>
         /// <param name="copyRulesForAll">Пара булевых значений с условиями
@@ -202,13 +202,13 @@
         public static async Task<Tuple<bool, bool>> CopyLegend(
             MainWindow mainWindow,
             Document activeDocument,
-            ViewSheet sheet,
-            ViewSheet sheetNew,
+            ViewSheet sourceSheet,
+            ViewSheet destinationSheet,
             Document destinationDocument,
             CopyPasteOptions cpOptions,
             Tuple<bool, bool> copyRulesForAll)
         {
-            var viewPortsId = sheet.GetAllViewports();
+            var viewPortsId = sourceSheet.GetAllViewports();
 
             var destinationViewLegends = new FilteredElementCollector(destinationDocument)
                 .OfClass(typeof(View))
@@ -236,7 +236,7 @@
                                 {
                                     copyLegend = false;
                                     newViewPort = Viewport.Create(
-                                        destinationDocument, sheetNew.Id, existDestinationLegend.Id, viewport.GetBoxCenter());
+                                        destinationDocument, destinationSheet.Id, existDestinationLegend.Id, viewport.GetBoxCenter());
                                 }
                                 else if (!copyRulesForAll.Item2)
                                 {
@@ -263,14 +263,14 @@
                                     {
                                         copyLegend = false;
                                         newViewPort = Viewport.Create(
-                                            destinationDocument, sheetNew.Id, existDestinationLegend.Id,
+                                            destinationDocument, destinationSheet.Id, existDestinationLegend.Id,
                                             viewport.GetBoxCenter());
                                     }
                                     else if (dialogResult == MessageDialogResult.FirstAuxiliary)
                                     {
                                         copyLegend = false;
                                         newViewPort = Viewport.Create(
-                                            destinationDocument, sheetNew.Id, existDestinationLegend.Id,
+                                            destinationDocument, destinationSheet.Id, existDestinationLegend.Id,
                                             viewport.GetBoxCenter());
                                         copyRulesForAll = new Tuple<bool, bool>(true, false);
                                     }
@@ -286,21 +286,21 @@
                                 var viewContents = new FilteredElementCollector(activeDocument)
                                     .OwnedByView(viewLegend.Id)
                                     .ToElementIds()
-                                    .Where(x => 
+                                    .Where(x =>
                                         activeDocument.GetElement(x).Category != null &&
                                         !activeDocument.GetElement(x).Category.IsBuiltInCategory(BuiltInCategory.OST_IOSSketchGrid))
                                     .ToList();
                                 if (viewContents.Any())
                                 {
-                                    if (GetValidLegend(destinationViewLegends) is View newViewLegend)
+                                    if (destinationDocument.GetElement(GetValidLegend(destinationViewLegends)
+                                        .Duplicate(ViewDuplicateOption.Duplicate)) is View newViewLegend)
                                     {
                                         newViewLegend.Name = GetSuffixNameElements(destinationViewLegends, viewLegend.Name);
                                         newViewLegend.Scale = viewLegend.Scale;
                                         ElementTransformUtils.CopyElements(
                                             viewLegend, viewContents, newViewLegend, null, cpOptions);
-
                                         newViewPort = Viewport.Create(
-                                            destinationDocument, sheetNew.Id, newViewLegend.Id, viewport.GetBoxCenter());
+                                            destinationDocument, destinationSheet.Id, newViewLegend.Id, viewport.GetBoxCenter());
                                     }
                                 }
                             }
@@ -438,7 +438,7 @@
         {
             return category.Id.IntegerValue == (int)builtInCategory;
         }
-        
+
         /// <summary>
         /// Получает имя листа с совпавшим числовым суффиксом в номере
         /// </summary>
@@ -478,7 +478,7 @@
 
             return newName;
         }
-        
+
         private static View GetValidLegend(IEnumerable<View> legends)
         {
             Exception cachedLastException = null;
@@ -498,7 +498,7 @@
                 catch (Exception exception)
                 {
                     cachedLastException = exception;
-                    
+
                     // go to next
                 }
             }
